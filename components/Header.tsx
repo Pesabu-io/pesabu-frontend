@@ -47,15 +47,15 @@ function Header() {
 
 
   return (
-    <header className="bg-[#013B94]">
+    <header className="bg-[#0f766e]">
         <nav className="mx-auto flex max-w-7xl items-center
         justify-between p-6 lg:px-8" aria-label="Global">
             <div className="flex lg:flex-1">
                 <Link href="/" 
                  className="-m-1.5 p-1.5">
-                 <span className="sr-only">Booking.com</span>
-                <img className="h-12 w-auto"
-                src="https://static1.squarespace.com/static/5bde0f00c3c16aa95581e2e2/62b4cb1add9d257dd43bb03d/62b653fedc7c895918d19b24/1656116254983/booking+logo+white.png?format=1500w"
+                 <span className="sr-only">esabu</span>
+                <img className="h-24 w-auto"
+                src="https://www.pesabu.co.ke/images/200/12160949/Pesabunobg.png"
                 alt="" />
                 
                 </Link>
@@ -78,7 +78,7 @@ function Header() {
             </div>
 
             <Popover.Group className="hidden lg:flex lg:gap-x-12">
-                <Popover className="relative">
+                {/* <Popover className="relative">
                     <Popover.Button className="flex items-center
                     gap-x-1 text-sm font-semibold leading-6 text-white">
                         Stays
@@ -132,24 +132,24 @@ function Header() {
                             </div>
                         </Popover.Panel>
                     </Transition>
-                </Popover>
+                </Popover> */}
                 <a href="#" className="text-sm font-semibold leading-6 text-white">
-                    Flights
+                   Features
                 </a>
                 <a href="#" className="text-sm font-semibold leading-6 text-white">
-                    Car Rentals
+                    Pricing
                 </a>
                 <a href="#" className="text-sm font-semibold leading-6 text-white">
-                    Attractions
+                    About
                 </a>
                 <a href="#" className="text-sm font-semibold leading-6 text-white">
-                    Flight + Hotel
+                    Contact
                 </a>
             </Popover.Group>
 
             <div className="hidden lg:flex lg:flex-1 lg:justify-end">
                 <a href="#" className="text-sm font-semibold leading-6 text-white">
-                    Log in <span aria-hidden="true">&rarr;</span>
+                    Sign in<span aria-hidden="true">&rarr;</span>
                 </a>
             </div>
         </nav>
