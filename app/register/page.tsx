@@ -18,7 +18,7 @@ export default function RegistrationForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-green-500 to-teal-900">
+    <div className="min-h-screen flex items-center justify-center bg-themeTeal">
       <div className="p-8 bg-white text-gray-800 shadow-2xl rounded-xl max-w-lg w-full">
         {/* Welcome Section */}
         <div className="text-center mb-6">
