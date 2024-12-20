@@ -1,38 +1,53 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { WelcomeCard } from "@/components/WelcomeCard";
-import { ReportCard } from "@/components/ReportCard";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
 
 const Index = () => {
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gray-50">
-        <AppSidebar />
-        <main className="flex-1 p-6">
-          <div className="max-w-6xl mx-auto space-y-6">
-            <WelcomeCard />
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              <ReportCard title="Previous Reports">
-                Your analysis reports will show here
-              </ReportCard>
-              
-              <ReportCard title="Loan Reports">
-                Your Loan reports will show here
-              </ReportCard>
-            </div>
+    
+      <div className="flex h-screen bg-white">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <Header />
+          <main className="p-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-teal-600 text-white p-8 rounded-lg mb-8">
+                <h2 className="text-3xl font-bold mb-2">Hey, Mike</h2>
+                <p>Welcome to Pesabu!</p>
+              </div>
 
-            <div className="flex justify-center mt-8">
-              <img 
-                src="/lovable-uploads/52b53987-9c46-46e8-a7a6-21f829190e36.png"
-                alt="Illustration"
-                className="max-w-md w-full"
-              />
+              <div className="flex justify-end mb-12">
+                <img
+                  src="/lovable-uploads/62091416-32c4-49fb-af5e-73c65d9efa05.png"
+                  alt="Illustration"
+                  className="w-64"
+                />
+              </div>
+
+              <div className="space-y-6">
+                <div className="border border-teal-200 rounded-lg">
+                  <h3 className="text-xl font-semibold text-teal-700 p-4 border-b border-teal-200">
+                    Previous Reports
+                  </h3>
+                  <div className="p-4 text-gray-500">
+                    Your analysis reports will show here
+                  </div>
+                </div>
+
+                <div className="border border-teal-200 rounded-lg">
+                  <h3 className="text-xl font-semibold text-teal-700 p-4 border-b border-teal-200">
+                    Loan Reports
+                  </h3>
+                  <div className="p-4 text-gray-500">
+                    Your Loan reports will show here
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
-    </SidebarProvider>
+   
   );
 };
 
