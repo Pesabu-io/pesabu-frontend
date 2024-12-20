@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata = {
   title: "Create Next App",
@@ -24,6 +25,7 @@ export default function RootLayout({
         
       </head>
       <body className="font-poppins antialiased">{children}</body>
+      <Toaster />
     </html>
   );
 }

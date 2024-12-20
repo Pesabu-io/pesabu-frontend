@@ -1,10 +1,12 @@
+'use client'
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { FileIcon } from "lucide-react";
+import { useToast } from "@/hooks/use-toast"
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+
 
 const UploadStatement = () => {
   const [dragActive, setDragActive] = useState(false);
@@ -68,7 +70,7 @@ const UploadStatement = () => {
   };
 
   return (
-    <SidebarProvider>
+ 
       <div className="flex h-screen bg-white">
         <Sidebar />
         <div className="flex-1 overflow-auto">
@@ -122,7 +124,7 @@ const UploadStatement = () => {
           </main>
         </div>
       </div>
-    </SidebarProvider>
+   
   );
 };
 
