@@ -1,50 +1,39 @@
-'use client'
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { WelcomeCard } from "@/components/WelcomeCard";
+import { ReportCard } from "@/components/ReportCard";
 
-import Banner from '@/components/Banner'
-import LoansSection from '@/components/Loans'
-import ReportsOverview from '@/components/ReportsOverview'
-import Sidebar from '@/components/Sidebar'
-import UserHeader from '@/components/UserHeader'
-import React from 'react'
-
-function dashboard() {
+const Index = () => {
   return (
-    <>
-         <div
-          className={`min-h-screen flex flex-col transition-colors duration-300 ${
-             "bg-themeTeal"
-          }`}
-        >
-          {/* Include Header above Sidebar */}
-          <UserHeader />
-          <div className="flex flex-1">
-            {/* Sidebar occupies the left part */}
-            <Sidebar />
-            {/* Main content shifts right beside the sidebar */}
-            <main className="flex-1 p-2 lg:ml-64">
-                <Banner />
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-gray-50">
+        <AppSidebar />
+        <main className="flex-1 p-6">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <WelcomeCard />
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              <ReportCard title="Previous Reports">
+                Your analysis reports will show here
+              </ReportCard>
+              
+              <ReportCard title="Loan Reports">
+                Your Loan reports will show here
+              </ReportCard>
+            </div>
 
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="w-full">
-                  <ReportsOverview />
-                </div>
-                {/* <div className="w-full">
-                  <PurchaseReturnChart />
-                </div> */}
-              </div>
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="w-full">
-                  <LoansSection />
-                </div>
-                {/* <div className="w-full">
-                  <PurchaseReturnChart />
-                </div> */}
-              </div>
-            </main>
+            <div className="flex justify-center mt-8">
+              <img 
+                src="/lovable-uploads/52b53987-9c46-46e8-a7a6-21f829190e36.png"
+                alt="Illustration"
+                className="max-w-md w-full"
+              />
+            </div>
           </div>
-        </div>
-    </>
-  )
-}
+        </main>
+      </div>
+    </SidebarProvider>
+  );
+};
 
-export default dashboard
+export default Index;
