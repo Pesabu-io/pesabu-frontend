@@ -25,7 +25,7 @@ export default function RootLayout({
         
       </head>
       <body className="font-poppins antialiased">{children}</body>
-      <Toaster />
+    
     </html>
   );
 }

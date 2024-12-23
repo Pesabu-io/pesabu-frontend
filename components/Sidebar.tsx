@@ -46,9 +46,9 @@ const Sidebar: React.FC = () => {
     };
   }, []);
 
-  if (!isMounted) {
-    return <SidebarSkeleton />;
-  }
+  // if (!isMounted) {
+  //   return <SidebarSkeleton />;
+  // }
 
   return(
     <div className="w-72 bg-teal-600 text-white p-6 flex flex-col">

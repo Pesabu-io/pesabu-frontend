@@ -1,12 +1,51 @@
 import React from 'react';
-import Header from './Header';
-
-
 import { PlayCircle, ArrowRight } from "lucide-react";
+import { Button } from '@/components/ui/button';
+
+import Header from '@/components/Header';
+import Link from 'next/link';
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-[#008080]">
+       <header className=" px-6 py-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-12">
+          <Link href={"/"} className="text-white text-2xl font-bold">
+            Pesabu
+          </Link>
+          
+          <nav className="hidden md:flex items-center gap-8">
+            <Link href={"/"} className="text-white hover:text-teal-100 transition-colors">
+              Features
+            </Link>
+            <Link href={"/"} className="text-white hover:text-teal-100 transition-colors">
+              Pricing
+            </Link>
+            <Link href={"/"} className="text-white hover:text-teal-100 transition-colors">
+              About
+            </Link>
+            <Link href={"/"} className="text-white hover:text-teal-100 transition-colors">
+              Contact
+            </Link>
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            className="text-white hover:text-teal-100 hover:bg-teal-700/50"
+          >
+            Sign in
+          </Button>
+          <Button
+            className="bg-white text-teal-600 hover:bg-teal-50"
+          >
+            Book a Demo
+          </Button>
+        </div>
+      </div>
+    </header>
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
         <div className="mx-auto px-4 py-16 sm:px-6 lg:px-8 text-white">
@@ -15,7 +54,7 @@ const HomePage = () => {
               {/* Badge */}
               <div className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-300 backdrop-blur-xl mb-6">
                 <span className="flex h-2 w-2 rounded-full bg-teal-400 mr-2"></span>
-                AI-Powered Lending Platform
+                AI-Powered 
               </div>
 
               {/* Main Heading */}
@@ -36,14 +75,7 @@ const HomePage = () => {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
-                {/* <Button size="lg" className="bg-teal-500 hover:bg-teal-600">
-                  Get Started Free
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="lg" className="text-slate-300 border-slate-700">
-                  <PlayCircle className="mr-2 h-4 w-4" />
-                  Watch Demo
-                </Button> */}
+                {/* ... keep existing code (commented out buttons) */}
               </div>
 
               {/* Stats */}

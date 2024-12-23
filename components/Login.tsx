@@ -19,7 +19,7 @@ export default function LoginForm() {
     <div 
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: 'url("YOUR_BACKGROUND_IMAGE_URL")', // Replace with your URL
+        backgroundImage: 'url("https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop")', // Replace with your URL
       }}
     >
       {/* Dark overlay */}
@@ -30,7 +30,7 @@ export default function LoginForm() {
         {/* Welcome Section */}
         <div className="text-center mb-6">
           <img
-            src="https://i.postimg.cc/bvnYCBVg/Whats-App-Image-2024-11-21-at-12-26-59.jpg"
+            src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop"
             alt="Welcome Illustration"
             className="mx-auto mb-4 w-24 h-24 rounded-full shadow-md hover:scale-105 transition-transform duration-300"
           />
