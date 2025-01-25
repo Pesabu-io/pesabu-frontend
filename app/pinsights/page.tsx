@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, Link2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Avatar,
@@ -11,10 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import Link from "next/link";
+import { useRouter } from 'next/navigation'
 
 const Index = () => {
   const [isHovered, setIsHovered] = useState(false);
-
+  const router = useRouter()
   const previousReports = [
     { name: "John Doe", phone: "+254712345678", time: "19:20", status: "success" },
     { name: "James Juma", phone: "+254712345678", time: "19:20", status: "success" },
@@ -45,7 +47,7 @@ const Index = () => {
                 onHoverEnd={() => setIsHovered(false)}
                 className="relative"
               >
-                <Button 
+                <Button  onClick={() => router.push("/upload")}
                   className="w-64 h-64 rounded-full bg-teal-200 hover:bg-teal-300 text-teal-800 text-3xl font-bold shadow-lg"
                 >
                   Start Analysis

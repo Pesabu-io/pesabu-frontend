@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlayCircle, ArrowRight } from "lucide-react";
+import { PlayCircle, ArrowRight, Link2Off } from "lucide-react";
 import { Button } from '@/components/ui/button';
 
 import Header from '@/components/Header';
@@ -16,7 +16,7 @@ const HomePage = () => {
           </Link>
           
           <nav className="hidden md:flex items-center gap-8">
-            <Link href={"/"} className="text-white hover:text-teal-100 transition-colors">
+            <Link href={"/pinsights"} className="text-white hover:text-teal-100 transition-colors">
               Features
             </Link>
             <Link href={"/"} className="text-white hover:text-teal-100 transition-colors">
@@ -32,12 +32,11 @@ const HomePage = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            className="text-white hover:text-teal-100 hover:bg-teal-700/50"
-          >
+          <Link
+           
+              className="text-white hover:text-teal-100 hover:bg-teal-700/50" href={'/login'}          >
             Sign in
-          </Button>
+          </Link>
           <Button
             className="bg-white text-teal-600 hover:bg-teal-50"
           >

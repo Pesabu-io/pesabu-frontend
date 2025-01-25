@@ -1,108 +1,126 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
-import Sidebar from "@/components/Sidebar";
+'use client'
 import Header from "@/components/Header";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import MetricCard from "@/components/MetricCard";
+import Sidebar from "@/components/Sidebar";
+import TransactionsTable from "@/components/TransactionsTable";
+import TransactionSummary from "@/components/TransactionSummary";
+import { useState } from "react";
 
-const Insights = () => {
-  const transactionData = [
-    {
-      name: "John Doe",
-      number: "+2547xxxxx678",
-      count: "100",
-      highest: "10,000.00",
-      total: "100,000.00",
-    },
-    {
-      name: "James Juma",
-      number: "+2547xxxxx678",
-      count: "76",
-      highest: "200.00",
-      total: "14,400.00",
-    },
-    {
-      name: "Jane Futurama",
-      number: "+2547xxxxx678",
-      count: "55",
-      highest: "100.00",
-      total: "5,500.00",
-    },
-    {
-      name: "Advil Afuma",
-      number: "+2547xxxxx678",
-      count: "55",
-      highest: "50.00",
-      total: "5,500.00",
-    },
+const Index = () => {
+  const [activeTab, setActiveTab] = useState("Summary");
+  
+  const user = {
+    name: "Mike Doe",
+    company: "CompanyX",
+  };
+
+  const documentInfo = {
+    name: "Mike Ndegwa",
+    mobile: "0723345678",
+    idNumber: "36985641",
+    email: "Mike123@gmail.com",
+    documentType: "Mpesa Statement",
+    period: "01/01/2024 - 01/03/2024",
+    status: "Analysis Completed",
+  };
+
+  const metrics = [
+    { title: "Total Transactions", value: "5000" },
+    { title: "Amount Transacted", value: "1,454,000" },
+    { title: "Financial Institutions", value: "25" },
+    { title: "Locations Mapped", value: "10" },
+    { title: "Utilities Mapped", value: "10" },
+    { title: "Credit Score Analysis", value: "75" },
   ];
 
-  const TransactionTable = ({ title }: { title: string }) => (
-    <div className="bg-teal-50/50 rounded-lg p-6 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold text-teal-800">{title}</h3>
-        <span className="text-sm text-teal-600">1st Dec - 31st Dec</span>
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Number</TableHead>
-            <TableHead>Count</TableHead>
-            <TableHead>Highest</TableHead>
-            <TableHead>Total</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transactionData.map((transaction, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarFallback>{transaction.name[0]}</AvatarFallback>
-                  </Avatar>
-                  {transaction.name}
-                </div>
-              </TableCell>
-              <TableCell>{transaction.number}</TableCell>
-              <TableCell>{transaction.count}</TableCell>
-              <TableCell>{transaction.highest}</TableCell>
-              <TableCell>{transaction.total}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  );
+  const tabs = ["Summary", "Transactions", "Financial Institutions", "Locations", "Utility"];
 
   return (
-
-      <div className="flex h-screen bg-white">
-        <Sidebar />
-        <div className="flex-1 overflow-auto">
-          <Header />
-          <main className="p-8">
-            <div className="max-w-6xl mx-auto">
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-teal-700">Mike Ndegwa</h2>
-                <p className="text-teal-600">072334678</p>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
+        <Header />
+        
+        <main className="p-6">
+          <div className="mb-8">
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div>
+                <div className="space-y-2">
+                  <div className="flex space-x-2">
+                    <span className="text-gray-500">Name:</span>
+                    <span className="font-medium">{documentInfo.name}</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <span className="text-gray-500">Mobile:</span>
+                    <span className="font-medium">{documentInfo.mobile}</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <span className="text-gray-500">ID Number:</span>
+                    <span className="font-medium">{documentInfo.idNumber}</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <span className="text-gray-500">Email:</span>
+                    <span className="font-medium">{documentInfo.email}</span>
+                  </div>
+                </div>
               </div>
-
-              <TransactionTable title="Top Sent" />
-              <TransactionTable title="Top Received" />
-              <TransactionTable title="Top B2C Paybill" />
+              <div>
+                <div className="space-y-2">
+                  <div className="flex space-x-2">
+                    <span className="text-gray-500">Document type:</span>
+                    <span className="font-medium">{documentInfo.documentType}</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <span className="text-gray-500">Statement Period:</span>
+                    <span className="font-medium">{documentInfo.period}</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <span className="text-gray-500">Status:</span>
+                    <span className="font-medium text-green-600">{documentInfo.status}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </main>
-        </div>
+
+            <div className="flex space-x-4 mb-6">
+              {tabs.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                    tab === activeTab
+                      ? "bg-primary text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === "Summary" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {metrics.map((metric) => (
+                  <MetricCard
+                    key={metric.title}
+                    title={metric.title}
+                    value={metric.value}
+                  />
+                ))}
+              </div>
+            )}
+
+            {activeTab === "Transactions" && (
+              <>
+                <TransactionSummary />
+                <TransactionsTable />
+              </>
+            )}
+          </div>
+        </main>
       </div>
-  
+    </div>
   );
 };
 
-export default Insights;
+export default Index;
