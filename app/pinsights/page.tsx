@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle, Link2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -17,6 +17,51 @@ import { useRouter } from 'next/navigation'
 const Index = () => {
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter()
+
+  const [data, setData] = useState({
+    transactions: null,
+    financial: null,
+    lifestyle: null,
+    utility: null
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch data from all endpoints
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // const [transRes, finRes, lifeRes, utilRes] = await Promise.all([
+        const [finRes] = await Promise.all([
+
+          // fetch('/api/transaction_module/trans_type'),
+          fetch('http://127.0.0.1:8000/financial_institutions_module/client_banks/'),
+          // fetch('/api/lifestyle_module/betting_summary_stats'),
+          // fetch('/api/lifestyle_module/data_bills')
+        ]);
+
+        // Add error checking for each response
+        // if (!transRes.ok || !finRes.ok || !lifeRes.ok || !utilRes.ok) {
+        if ( !finRes.ok ) {
+
+          throw new Error('One or more API calls failed');
+        }
+
+        // const transactions = await transRes.json();
+        const financial = await finRes.json();
+        // const lifestyle = await lifeRes.json();
+        // const utility = await utilRes.json();
+
+        setData(  financial );
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
   const previousReports = [
     { name: "John Doe", phone: "+254712345678", time: "19:20", status: "success" },
     { name: "James Juma", phone: "+254712345678", time: "19:20", status: "success" },
@@ -24,11 +69,12 @@ const Index = () => {
     { name: "Advil Afuma", phone: "+254712345678", time: "19:20", status: "error" },
   ];
 
+  console.log(data)
   return (
     <div className="flex h-screen bg-gray-50">
-    <Sidebar />
-    <div className="flex-1 overflow-auto">
-      <Header />
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
+        <Header />
         <main className="p-8">
           <div className="max-w-4xl mx-auto">
             <div className="mb-12">

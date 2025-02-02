@@ -10,7 +10,7 @@ import Utility from "@/components/Utlity";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { motion } from "framer-motion";
 import { CreditCard, FileText, User, Mail, Phone, Calendar, Badge } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("Summary");
@@ -38,6 +38,8 @@ const Index = () => {
     { title: "Utilities Mapped", value: "10", icon: <Phone className="w-6 h-6 text-primary" /> },
     { title: "Credit Score Analysis", value: "75", icon: <Calendar className="w-6 h-6 text-primary" /> },
   ];
+
+
 
 
   const tabs = ["Summary", "Transactions", "Financial Institutions", "Locations", "Utility"];
