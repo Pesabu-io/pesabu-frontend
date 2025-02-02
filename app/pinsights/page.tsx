@@ -26,9 +26,9 @@ const Index = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <Header />
+    <Sidebar />
+    <div className="flex-1 overflow-auto">
+      <Header />
         <main className="p-8">
           <div className="max-w-4xl mx-auto">
             <div className="mb-12">
