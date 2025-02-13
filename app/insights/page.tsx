@@ -1,9 +1,11 @@
 'use client'
 import FinancialInstitutions from "@/components/FinancialInstitutions";
 import Header from "@/components/Header";
+import LifestyleDashboard from "@/components/Lifestyle";
 import MetricCard from "@/components/MetricCard";
 import Sidebar from "@/components/Sidebar";
 import TransactionsTable from "@/components/TransactionsTable";
+import TransactionDashboard from "@/components/TransactionSummary";
 import TransactionSummary from "@/components/TransactionSummary";
 import { Card } from "@/components/ui/card";
 import Utility from "@/components/Utlity";
@@ -42,7 +44,7 @@ const Index = () => {
 
 
 
-  const tabs = ["Summary", "Transactions", "Financial Institutions", "Locations", "Utility"];
+  const tabs = ["Summary", "Transactions", "Financial Institutions", "Lifestyle", "Utility"];
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -181,13 +183,16 @@ const Index = () => {
 
               {activeTab === "Transactions" && (
                 <>
-                  <TransactionSummary />
-                  <TransactionsTable />
+                 <TransactionDashboard />
                 </>
               )}
 
               {activeTab === "Financial Institutions" && (
                 <FinancialInstitutions />
+              )}
+
+{activeTab === "Lifestyle" && (
+                <LifestyleDashboard />
               )}
 
               
