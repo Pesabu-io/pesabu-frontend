@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { FileIcon } from "lucide-react";
+import { FileIcon, Upload, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import {
@@ -20,6 +19,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { motion } from "framer-motion";
 
 const UploadStatement = () => {
   const [dragActive, setDragActive] = useState(false);
@@ -111,19 +111,18 @@ const UploadStatement = () => {
         description: "Statement uploaded and processed successfully",
       });
       
-       // Fetch financial institutions data
-    const banksResponse = await fetch("http://127.0.0.1:8000/financial_institutions_module/client_banks/");
-    if (!banksResponse.ok) {
-      throw new Error("Failed to fetch financial institutions data");
-    }
+      // Fetch financial institutions data
+      const banksResponse = await fetch("http://127.0.0.1:8000/financial_institutions_module/client_banks/");
+      if (!banksResponse.ok) {
+        throw new Error("Failed to fetch financial institutions data");
+      }
 
-    const banksData = await banksResponse.json();
+      const banksData = await banksResponse.json();
 
-    // Navigate to insights or display the results
-    console.log("Banks Data:", banksData); // Debugging: Check the fetched data
-      // Store the processed data or handle navigation
+      // Navigate to insights or display the results
+      console.log("Banks Data:", banksData);
       setIsVerificationOpen(false);
-      router.push("/insights"); // Or wherever you want to redirect after success
+      router.push("/insights"); 
 
     } catch (error) {
       toast({
@@ -137,22 +136,42 @@ const UploadStatement = () => {
   };
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-gray-50">
       <Sidebar />
       <div className="flex-1 overflow-auto">
         <Header />
         <main className="p-8">
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-teal-600 text-white p-8 rounded-2xl">
-              <h2 className="text-3xl font-bold text-center mb-8">
-                Upload Mpesa Statement
-              </h2>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-3xl mx-auto"
+          >
+            <div className="bg-gradient-to-br from-teal-600 to-teal-700 text-white p-10 rounded-3xl shadow-xl">
+              <motion.h2 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="text-3xl font-bold text-center mb-2"
+              >
+                Upload M-PESA Statement
+              </motion.h2>
+              
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="text-center text-teal-100 mb-8"
+              >
+                Upload your statement to gain financial insights
+              </motion.p>
 
-              <div
-                className={`relative border-2 border-dashed rounded-lg p-8 text-center ${
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                className={`relative border-2 border-dashed rounded-2xl p-12 text-center transition-all ${
                   dragActive
-                    ? "border-white bg-teal-500"
-                    : "border-teal-300 bg-teal-500/50"
+                    ? "border-white bg-teal-500/70"
+                    : "border-teal-300/70 bg-teal-500/30"
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -165,60 +184,92 @@ const UploadStatement = () => {
                   onChange={handleFileInput}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
-                <FileIcon className="mx-auto mb-4 h-12 w-12" />
-                <p className="text-lg mb-2">
-                  {selectedFile ? selectedFile.name : "Drag & Drop file here.."}
-                </p>
-                <p className="text-sm text-teal-100">
-                  or click to select a PDF file
-                </p>
-              </div>
+                
+                {selectedFile ? (
+                  <motion.div 
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    className="flex flex-col items-center"
+                  >
+                    <div className="bg-teal-400/30 rounded-full p-4 mb-4">
+                      <CheckCircle2 className="h-12 w-12 text-white" />
+                    </div>
+                    <p className="text-xl font-medium mb-2">{selectedFile.name}</p>
+                    <p className="text-sm text-teal-100">
+                      File selected • Click to change
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.div className="flex flex-col items-center">
+                    <div className="bg-teal-400/30 rounded-full p-4 mb-4">
+                      <Upload className="h-12 w-12 text-white" />
+                    </div>
+                    <p className="text-xl font-medium mb-2">
+                      Drag & Drop your M-PESA statement
+                    </p>
+                    <p className="text-sm text-teal-100">
+                      or click to browse your files (PDF only)
+                    </p>
+                  </motion.div>
+                )}
+              </motion.div>
 
-              <div className="mt-6 text-center">
-                <Button
-                  onClick={handleSubmit}
-                  className="bg-white text-teal-600 hover:bg-teal-50"
-                  size="lg"
-                  disabled={isUploading}
-                >
-                  {isUploading ? "Uploading..." : "Send"}
-                </Button>
+              <div className="mt-8 text-center">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    onClick={handleSubmit}
+                    className="bg-white text-teal-600 hover:bg-teal-50 text-lg px-12 py-6 h-auto rounded-xl font-medium shadow-md hover:shadow-lg transition-all"
+                    size="lg"
+                    disabled={isUploading}
+                  >
+                    {isUploading ? "Processing..." : selectedFile ? "Upload Statement" : "Select File"}
+                  </Button>
+                </motion.div>
               </div>
             </div>
-          </div>
+            
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              className="mt-6 text-center text-gray-500 text-sm"
+            >
+              Your data is encrypted and secure. We analyze your statement to provide personalized insights.
+            </motion.div>
+          </motion.div>
         </main>
       </div>
 
       <Dialog open={isVerificationOpen} onOpenChange={setIsVerificationOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-white rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Enter Statement Password</DialogTitle>
-            <DialogDescription>
-              Enter the 6-digit password for your M-PESA statement
+            <DialogTitle className="text-2xl font-bold text-center text-teal-700">Statement Password</DialogTitle>
+            <DialogDescription className="text-center mt-2">
+              Enter the 6-digit password provided with your M-PESA statement
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col items-center space-y-4">
+          <div className="flex flex-col items-center space-y-6 py-4">
             <InputOTP
               maxLength={6}
               value={verificationCode}
               onChange={setVerificationCode}
-              className="gap-2"
+              className="gap-3"
             >
               <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
+                <InputOTPSlot index={0} className="rounded-xl h-14 w-14 text-xl" />
+                <InputOTPSlot index={1} className="rounded-xl h-14 w-14 text-xl" />
+                <InputOTPSlot index={2} className="rounded-xl h-14 w-14 text-xl" />
+                <InputOTPSlot index={3} className="rounded-xl h-14 w-14 text-xl" />
+                <InputOTPSlot index={4} className="rounded-xl h-14 w-14 text-xl" />
+                <InputOTPSlot index={5} className="rounded-xl h-14 w-14 text-xl" />
               </InputOTPGroup>
             </InputOTP>
             <Button
               onClick={handleVerification}
-              className="w-full"
+              className="w-full bg-teal-600 hover:bg-teal-700 py-6 h-auto text-lg rounded-xl font-medium"
               disabled={isUploading}
             >
-              {isUploading ? "Processing..." : "Verify & Upload"}
+              {isUploading ? "Processing Statement..." : "Verify & Process"}
             </Button>
           </div>
         </DialogContent>
