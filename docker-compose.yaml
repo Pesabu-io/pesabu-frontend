@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  frontend:
+    container_name: pesabu-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      target: deps
+    command: bun run dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - pesabu-network
+
+networks:
+  imei-network:
+    driver: bridge
