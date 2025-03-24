@@ -7,10 +7,6 @@ import { motion } from "framer-motion";
 const UserHeader: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false); // State for dropdown visibility
 
-  // Hard-coded user information for example (can be dynamic)
-  const userName = "John Doe";
-  const userRole = "Admin";
-
   // Function to toggle dropdown
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
