@@ -18,5 +18,5 @@ services:
       - pesabu-network
 
 networks:
-  imei-network:
+  pesabu-network:
     driver: bridge
