@@ -1,145 +1,167 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { CheckCircle, Link2, XCircle } from "lucide-react";
+import { CheckCircle, Lock, Shield, Upload, } from "lucide-react";
 import { motion } from "framer-motion";
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import Link from "next/link";
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
-const Index = () => {
+const PInsights = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const router = useRouter()
-
-  const [data, setData] = useState({
-    transactions: null,
-    financial: null,
-    lifestyle: null,
-    utility: null
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Fetch data from all endpoints
+  const router = useRouter();
+  
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // const [transRes, finRes, lifeRes, utilRes] = await Promise.all([
-        const [finRes] = await Promise.all([
-
-          // fetch('/api/transaction_module/trans_type'),
-          fetch('http://127.0.0.1:8000/financial_institutions_module/client_banks/'),
-          // fetch('/api/lifestyle_module/betting_summary_stats'),
-          // fetch('/api/lifestyle_module/data_bills')
-        ]);
-
-        // Add error checking for each response
-        // if (!transRes.ok || !finRes.ok || !lifeRes.ok || !utilRes.ok) {
-        if ( !finRes.ok ) {
-
-          throw new Error('One or more API calls failed');
-        }
-
-        // const transactions = await transRes.json();
-        const financial = await finRes.json();
-        // const lifestyle = await lifeRes.json();
-        // const utility = await utilRes.json();
-
-        setData(  financial );
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
-  const previousReports = [
-    { name: "John Doe", phone: "+254712345678", time: "19:20", status: "success" },
-    { name: "James Juma", phone: "+254712345678", time: "19:20", status: "success" },
-    { name: "Jane Futurama", phone: "+254712345678", time: "19:20", status: "success" },
-    { name: "Advil Afuma", phone: "+254712345678", time: "19:20", status: "error" },
+
+  const securityFeatures = [
+    { icon: <Lock size={18} />, text: "Password Protected" },
+    { icon: <Shield size={18} />, text: "Data Encryption" },
+    { icon: <CheckCircle size={18} />, text: "GDPR Compliant" }
   ];
 
-  console.log(data)
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       <Sidebar />
-      <div className="flex-1 overflow-auto">
+      
+      <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="p-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="mb-12">
-              <h2 className="text-4xl font-bold text-teal-700 mb-4">
-                Unlock the Power of Your Mpesa Statements
-              </h2>
-              <p className="text-gray-600 text-lg">
-                Discover insights from your Mpesa transactions like never before with Mpesa Analyzer
-              </p>
-            </div>
-
-            <div className="flex justify-center mb-16">
+        
+        <main className="flex-1 overflow-y-auto relative">
+          {/* Gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-pesabu-light/20 to-white z-0"></div>
+          
+          {/* Animated background elements */}
+          <div className="absolute w-full h-full overflow-hidden">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 0.6, scale: 1 }}
+              transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+              className="absolute top-1/4 -right-20 w-64 h-64 bg-pesabu-gold/10 rounded-full blur-2xl"
+            ></motion.div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 0.5, scale: 1 }}
+              transition={{ duration: 3, delay: 0.5, repeat: Infinity, repeatType: "reverse" }}
+              className="absolute bottom-1/4 -left-20 w-80 h-80 bg-pesabu-teal/10 rounded-full blur-2xl"
+            ></motion.div>
+            <svg className="absolute top-0 left-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+              <pattern id="pattern-circles" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
+                <circle id="pattern-circle" cx="10" cy="10" r="1" fill="none" stroke="#0E797D" strokeWidth="1"></circle>
+              </pattern>
+              <rect id="rect" x="0" y="0" width="100%" height="100%" fill="url(#pattern-circles)"></rect>
+            </svg>
+          </div>
+          
+          <div className="container mx-auto px-6 py-12 relative z-10">
+            <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                onHoverStart={() => setIsHovered(true)}
-                onHoverEnd={() => setIsHovered(false)}
-                className="relative"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+                transition={{ duration: 0.6 }}
+                className="inline-block mb-3 px-4 py-1 bg-gradient-to-r from-pesabu-gold/10 to-pesabu-gold/20 rounded-full"
               >
-                <Button  onClick={() => router.push("/upload")}
-                  className="w-64 h-64 rounded-full bg-teal-200 hover:bg-teal-300 text-teal-800 text-3xl font-bold shadow-lg"
-                >
-                  Start Analysis
-                </Button>
+                <span className="text-pesabu-gold font-medium">P-Insights</span>
               </motion.div>
-            </div>
-
-            <div className="mt-16">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Previous Reports</h3>
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone Number</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {previousReports.map((report, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback>{report.name[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{report.name}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.phone}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.time}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {report.status === "success" ? (
-                            <CheckCircle className="text-green-500 h-5 w-5" />
-                          ) : (
-                            <XCircle className="text-red-500 h-5 w-5" />
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              
+              <motion.h1 
+                className=" text-pesabu-gold text-4xl md:text-5xl lg:text-6xl mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                Unlock the Power of Your Mpesa Statements
+              </motion.h1>
+              
+              <motion.p
+                className="text-gray-600 max-w-2xl mx-auto mb-8 text-lg"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                Discover insights from your Mpesa transactions like never before. Our advanced analysis 
+                helps you understand your spending patterns, identify opportunities for savings, 
+                and make better financial decisions.
+              </motion.p>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="flex flex-wrap justify-center gap-4 mb-8"
+              >
+                {securityFeatures.map((item, index) => (
+                  <div 
+                    key={index} 
+                    className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-gray-100"
+                  >
+                    <div className="text-pesabu-gold">{item.icon}</div>
+                    <span className="text-pesabu-teal text-sm font-medium">{item.text}</span>
+                  </div>
+                ))}
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.7 }}
+                className="mt-10 mb-10"
+              >
+                <motion.button
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  onHoverStart={() => setIsHovered(true)}
+                  onHoverEnd={() => setIsHovered(false)}
+                  onClick={() => router.push("/upload")}
+                  className="relative flex items-center justify-center w-64 h-64 rounded-full bg-gradient-to-br from-pesabu-teal to-pesabu-teal/80 text-white text-2xl font-bold shadow-xl overflow-hidden group"
+                >
+                  <div className="relative z-10 flex flex-col items-center">
+                    <Upload size={40} className="mb-3" />
+                    <span>Start Analysis</span>
+                    <p className="text-sm font-normal mt-2 opacity-80">Secure & Confidential</p>
+                  </div>
+                  
+                  {/* Button animation overlay */}
+                  <motion.div 
+                    className="absolute inset-0 bg-pesabu-gold/20"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ 
+                      scale: isHovered ? 1.5 : 0,
+                      opacity: isHovered ? 1 : 0
+                    }}
+                    transition={{ duration: 0.8 }}
+                  />
+                </motion.button>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isLoaded ? 1 : 0 }}
+                transition={{ duration: 0.6, delay: 0.9 }}
+                className="text-gray-500 text-sm max-w-lg mx-auto"
+              >
+                <p>
+                  By uploading your statement, you agree to our{" "}
+                  <Link href="/terms" className="text-pesabu-teal hover:underline">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="text-pesabu-teal hover:underline">
+                    Data Protection Policy
+                  </Link>
+                  . Your data is encrypted and never shared with third parties.
+                </p>
+              </motion.div>
             </div>
           </div>
         </main>
@@ -148,4 +170,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default PInsights;

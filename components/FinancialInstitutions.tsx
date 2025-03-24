@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -10,128 +10,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Line } from 'recharts';
-import { Clock, TrendingUp, ArrowUpCircle, ArrowDownCircle, Wallet, CreditCard, Building, ArrowRightLeft, Activity, CheckCircle2, AlertCircle, LineChart } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,  } from 'recharts';
+import { Clock, TrendingUp, ArrowUpCircle, ArrowDownCircle, Wallet, CreditCard, Building, ArrowRightLeft, Activity, CheckCircle2, AlertCircle,  } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertTitle, AlertDescription } from "./ui/alert";
-
-// Types for all API responses
-interface Transaction {
-  "Receipt No.": string;
-  "Completion Time": string;
-  "Details": string;
-  "Paid In": number;
-  "Withdrawn": number;
-  "Balance": number;
-  "month_name": string;
-  "day_name": string;
-  "Hour": number;
-  "Transaction_Type": string;
-  "Bank": string | null;
-  "Financial_Service"?: string;
-  "Mshwari_Service"?: string;
-  "Grouped_Bank"?: string;
-}
-
-interface BankSummaryMetrics {
-  total_amount_received: number;
-  highest_amount_received: number;
-  lowest_amount_received: number;
-  highest_amount_bank: string;
-  lowest_amount_bank: string;
-}
-
-interface BankSentMetrics {
-  total_amount_sent: number;
-  highest_amount_sent: number;
-  lowest_amount_sent: { lowest_sent_amount: number };
-  highest_amount_bank: string;
-  lowest_amount_bank: string;
-}
-
-interface FulizaSummary {
-  total_loan_count: number;
-  highest_loan_disbursed: number;
-  highest_loan_paid_back: number;
-  date_of_last_loan_disbursement: string;
-  date_of_last_loan_repayment: string;
-  last_amount_borrowed: number;
-  last_amount_paid_back: number;
-  total_loan_disbursed_amount: number;
-  total_loan_paid_back_amount: number;
-  total_loan_balance: number;
-}
-
-interface TopBankCount {
-  bank: string;
-  count: number;
-}
-
-interface TopFiveBanksResponse {
-  top_five_banks: {
-    bank: string;
-    count: number;
-  }[];
-}
-
-interface DashboardData {
-  receivedMetrics?: BankSummaryMetrics;
-  sentMetrics?: BankSentMetrics;
-  fulizaMetrics?: FulizaSummary;
-  fulizaTransactions?: Transaction[];
-  safaricomServices?: Transaction[];
-  topReceived?: TopFiveBanksResponse;  // Updated this type
-  topSent?: TopFiveBanksResponse;      // Updated this type
-}
-
-
+import InsightsTabContent from "./InsightsTabContent";
+import { useFinancialInstitutionsData } from "@/hooks/useFinancialInstitutionsData";
 
 
 const FinancialInstitutions: React.FC = () => {
-  const [data, setData] = useState<DashboardData>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
 
 
-  useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        const endpoints = {
-          receivedMetrics: '/financial_institutions_module/bank_received_summary_metrics/',
-          sentMetrics: '/financial_institutions_module/bank_sent_summary_metrics/',
-          fulizaMetrics: '/financial_institutions_module/fuliza_loan_summary/',
-          topReceived: '/financial_institutions_module/top_five_received_count/',
-          topSent: '/financial_institutions_module/top_five_sent_count/',
-          fulizaTransactions: '/financial_institutions_module/fuliza_usage/',
-          safaricomServices: '/financial_institutions_module/identify_safaricom_financial_services/'
-        };
 
-        const responses = await Promise.all(
-          Object.entries(endpoints).map(async ([key, url]) => {
-            const response = await fetch(`http://127.0.0.1:8000${url}`);
-            if (!response.ok) throw new Error(`Failed to fetch ${key}`);
-            const data = await response.json();
-            return [key, data];
-          })
-        );
+  const { data, isLoading, error,  } = useFinancialInstitutionsData();
+  
 
-        const formattedData = Object.fromEntries(responses);
-        // Fix the fulizaTransactions data structure
-        formattedData.fulizaTransactions = formattedData.fulizaTransactions?.fuliza_usage || [];
-        setData(formattedData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAllData();
-  }, []);
-
-
-  if (loading) return (
+  if (isLoading && !data) return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-lg">Loading dashboard data...</div>
     </div>
@@ -587,48 +481,18 @@ const FinancialInstitutions: React.FC = () => {
         </TabsContent>
 
               <TabsContent value="insights" className="space-y-6">
-          <FinancialHealthScore />
-          
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Transaction Patterns</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="text-sm font-medium mb-2">Transaction Volume by Bank</h4>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={calculateBankTrends()}>
-                      <XAxis dataKey="bank" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-medium mb-2">Transaction Success Trend</h4>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={[
-                      { name: 'Week 1', rate: 92 },
-                      { name: 'Week 2', rate: 88 },
-                      { name: 'Week 3', rate: 95 },
-                      { name: 'Week 4', rate: getTransactionSuccessRate() }
-                    ]}>
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="rate" stroke="#8884d8" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-          </Card>
+              <FinancialHealthScore />
+      
+              <InsightsTabContent 
+    calculateBankTrends={calculateBankTrends}
+    getTransactionSuccessRate={getTransactionSuccessRate}
+    FinancialHealthScore={FinancialHealthScore}
+    TransactionInsights={TransactionInsights}
+    RiskAlerts={RiskAlerts}
+  />
 
-          <TransactionInsights />
-          <RiskAlerts />
+      <TransactionInsights />
+      <RiskAlerts />
         </TabsContent>
       </Tabs>
     </div>

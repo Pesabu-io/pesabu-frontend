@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Wallet, PiggyBank, TrendingDown, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { server } from "@/utils/util";
 
 // TypeScript interfaces
 interface BettingSummaryStats {
@@ -41,7 +42,7 @@ const LifestyleDashboard = () => {
     const fetchLifestyleData = async () => {
       try {
         // Fetch betting stats
-        const bettingResponse = await fetch('http://127.0.0.1:8000/lifestyle_module/betting_summary_stats/');
+        const bettingResponse = await fetch(`${server}/lifestyle_module/betting_summary_stats/`);
         const bettingData = await bettingResponse.json();
         setBettingStats({
           data: bettingData,
@@ -50,7 +51,7 @@ const LifestyleDashboard = () => {
         });
 
         // Fetch saving stats
-        const savingResponse = await fetch('http://127.0.0.1:8000/lifestyle_module/saving_summary_stats/');
+        const savingResponse = await fetch(`${server}/lifestyle_module/saving_summary_stats/`);
         const savingData = await savingResponse.json();
         setSavingStats({
           data: savingData,
@@ -58,8 +59,9 @@ const LifestyleDashboard = () => {
           error: null,
         });
       } catch (error) {
-        setBettingStats(prev => ({ ...prev, isLoading: false, error: 'Failed to fetch betting data' }));
-        setSavingStats(prev => ({ ...prev, isLoading: false, error: 'Failed to fetch saving data' }));
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        setBettingStats(prev => ({ ...prev, isLoading: false, error: `Failed to fetch betting data: ${errorMessage}` }));
+        setSavingStats(prev => ({ ...prev, isLoading: false, error: `Failed to fetch saving data: ${errorMessage}` }));
       }
     };
 

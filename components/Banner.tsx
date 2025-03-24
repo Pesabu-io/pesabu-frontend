@@ -1,8 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { PlusCircle, BarChart2, CreditCard, Settings } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { motion,  } from "framer-motion";
 import BannerSkeleton from "./BannerSkeleton";
 
 
@@ -11,15 +9,8 @@ const Banner: React.FC = () => {
   const [currentDate, setCurrentDate] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   
-  const [isCreateAdModalOpen, setIsCreateAdModalOpen] = useState(false);
-  const router = useRouter();
-
+;
  
-  const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false); // For showing success message
-
-
-  const handleCloseModal = () => setIsCreateAdModalOpen(false);
-
   useEffect(() => {
     const updateGreeting = () => {
       const hour = new Date().getHours();
@@ -55,44 +46,7 @@ const Banner: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const actionButtons = [
-    {
-      icon: PlusCircle,
-      label: "Create Ad",
-      action: () => setIsCreateAdModalOpen(true),
-      bgColor: "bg-blue-100",
-      textColor: "text-blue-700",
-      borderColor: "border-blue-700",
-      hoverBg: "hover:bg-blue-200",
-    },
-    {
-      icon: BarChart2,
-      label: "View All Ads",
-      action: () => router.push("/ads"),
-      bgColor: "bg-purple-100",
-      textColor: "text-purple-700",
-      borderColor: "border-purple-700",
-      hoverBg: "hover:bg-purple-200",
-    },
-    {
-      icon: CreditCard,
-      label: "Manage Budget",
-      action: () => router.push("/budget"),
-      bgColor: "bg-green-100",
-      textColor: "text-green-700",
-      borderColor: "border-green-700",
-      hoverBg: "hover:bg-green-200",
-    },
-    {
-      icon: Settings,
-      label: "Settings",
-      action: () => router.push("/account"),
-      bgColor: "bg-red-100",
-      textColor: "text-red-700",
-      borderColor: "border-red-700",
-      hoverBg: "hover:bg-red-200",
-    },
-  ];
+ 
 
   if (isLoading) {
     return <BannerSkeleton />;
@@ -104,7 +58,7 @@ const Banner: React.FC = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-foreground p-4 sm:p-6 mb-6 bg-themeTeal rounded-lg shadow-lg"
+        className="text-foreground p-4 sm:p-6 mb-6 bg-themeTeal rounded-lg `s`hadow-lg"
       >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
           <motion.div
