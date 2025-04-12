@@ -10,6 +10,7 @@ interface FinancialData {
   topSent: any[];
   fulizaTransactions: any[];
   safaricomServices: any[];
+  clientBanks: string[]; // Add client banks
   creditScore: {
     credit_score: number;
     credit_score_status: string;
@@ -21,6 +22,7 @@ interface FinancialDataState {
   isLoading: boolean;
   error: string | null;
   lastUpdated: Date | null;
+  bankCount: number; // Add bank count
 }
 
 export const useFinancialInstitutionsData = () => {
@@ -30,6 +32,7 @@ export const useFinancialInstitutionsData = () => {
     isLoading: true,
     error: null,
     lastUpdated: null,
+    bankCount: 0, // Initialize bank count
   });
 
   // Define the API endpoints
@@ -41,6 +44,7 @@ export const useFinancialInstitutionsData = () => {
     topSent: '/financial_institutions_module/top_five_sent_count/',
     fulizaTransactions: '/financial_institutions_module/fuliza_usage/',
     safaricomServices: '/financial_institutions_module/identify_safaricom_financial_services/',
+    clientBanks: '/financial_institutions_module/client_banks/', // Add client banks endpoint
     creditScore: '/credit_score_module/get_credit_score/' 
   };
 
@@ -88,6 +92,7 @@ export const useFinancialInstitutionsData = () => {
     const results: Record<string, any> = {};
     let hasError = false;
     let errorMessage = '';
+    let bankCount = 0; // Initialize bank count
     
     // Process each endpoint individually to prevent one failure from blocking all
     for (const [key, endpoint] of Object.entries(endpoints)) {
@@ -97,7 +102,26 @@ export const useFinancialInstitutionsData = () => {
         // Handle special case for fulizaTransactions
         if (key === 'fulizaTransactions') {
           results[key] = data?.fuliza_usage || [];
-        } else {
+        } 
+        // Handle special case for clientBanks
+      
+else if (key === 'clientBanks') {
+  if (Array.isArray(data) && data.length > 0) {
+    // The first element is the array of bank names
+    const bankNames = Array.isArray(data[0]) ? data[0] : [];
+    results[key] = bankNames;
+    
+    // Count unique banks (case-insensitive)
+    const uniqueBanks = new Set(
+      bankNames.filter(bank => typeof bank === 'string')
+        .map((bank: string) => bank.toLowerCase())
+    );
+    bankCount = uniqueBanks.size;
+  } else {
+    results[key] = [];
+  }
+}
+        else {
           results[key] = data;
         }
       } catch (error) {
@@ -108,10 +132,17 @@ export const useFinancialInstitutionsData = () => {
         // Use cached data for this endpoint if available
         if (state.data && state.data[key as keyof FinancialData]) {
           results[key] = state.data[key as keyof FinancialData];
+          
+          // If we're using cached client banks data, recalculate the count
+          if (key === 'clientBanks' && Array.isArray(state.data.clientBanks)) {
+            const uniqueBanks = new Set(state.data.clientBanks.map(bank => bank.toLowerCase()));
+            bankCount = uniqueBanks.size;
+          }
+          
           console.log(`Using cached data for ${key}`);
         } else {
           // Initialize with empty data structure
-          results[key] = key.includes('top') || key.includes('Transactions') || key.includes('Services') ? [] : {};
+          results[key] = key.includes('top') || key.includes('Transactions') || key.includes('Services') || key === 'clientBanks' ? [] : {};
         }
       }
     }
@@ -122,6 +153,7 @@ export const useFinancialInstitutionsData = () => {
       isLoading: false,
       error: hasError ? errorMessage : null,
       lastUpdated: new Date(),
+      bankCount: bankCount,
     });
   }, [fetchWithRetry, state.data]);
 
@@ -129,22 +161,24 @@ export const useFinancialInstitutionsData = () => {
   const getInsights = useCallback(() => {
     if (!state.data) return null;
     
-    const { receivedMetrics, sentMetrics, fulizaMetrics, creditScore  } = state.data;
+    const { receivedMetrics, sentMetrics, fulizaMetrics, creditScore, clientBanks } = state.data;
     
     // Add defensive checks for all data
     const totalReceived = receivedMetrics?.total_amount || 0;
     const totalSent = sentMetrics?.total_amount || 0;
     const fulizaAmount = fulizaMetrics?.total_amount || 0;
     const score = creditScore?.credit_score || 0;
+    const uniqueBanksCount = state.bankCount;
     
     return {
       netFlow: totalReceived - totalSent,
       fulizaUtilization: fulizaAmount,
       creditScore: score,
       creditScoreStatus: creditScore?.credit_score_status || 'Unknown',
+      uniqueBanksCount, // Add the bank count to insights
       // Add more insights as needed, with defensive checks
     };
-  }, [state.data]);
+  }, [state.data, state.bankCount]);
 
   // Function to manually refresh data
   const refreshData = useCallback(() => {

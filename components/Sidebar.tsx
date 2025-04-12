@@ -206,26 +206,7 @@ const Sidebar: React.FC = () => {
           </motion.div>
         ))}
         
-        {isOpen && (
-          <motion.div 
-            className="mt-6 px-4 py-3 flex items-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-              <img 
-                src="/api/placeholder/32/32" 
-                alt="User" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="ml-3">
-              <p className="text-xs font-medium text-gray-800">John Smith</p>
-              <p className="text-xs text-gray-500">Admin</p>
-            </div>
-          </motion.div>
-        )}
+        
       </div>
     </motion.div>
   );
