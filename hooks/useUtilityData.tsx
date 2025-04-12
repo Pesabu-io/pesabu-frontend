@@ -2,31 +2,36 @@ import { server } from '@/utils/util';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 // Define interfaces based on your API responses
-interface KplcTransaction {
+interface UtilityTransaction {
   "Receipt No.": string;
   "Completion Time": string;
+  Details: string;
   amount: number;
   month_name: string;
+  day_name: string;
+  names?: string;
+  numbers?: string;
 }
 
-interface KplcMetrics {
+interface UtilityMetrics {
   total_transactions: number;
   average_transactions_per_month: number;
   total_tranasacted_amount: number;
+  highest_transacted_amount: number;
+  minimum_transacted_amount: number;
   average_transacted_amount: number;
 }
 
-interface WifiStatus {
-  safaricom: string | null;
-  zuku: string | null;
-}
-
 interface UtilityData {
-  bills: any[];
-  kplcTransactions: KplcTransaction[];
-  kplcMetrics: KplcMetrics | null;
-  wifiStatus: WifiStatus;
-  fuelStatus: string | null;
+  bills: UtilityTransaction[];
+  kplcTransactions: UtilityTransaction[];
+  kplcMetrics: UtilityMetrics | null;
+  safaricomWifi: UtilityTransaction[];
+  safaricomWifiMetrics: UtilityMetrics | null;
+  zukuWifi: UtilityTransaction[];
+  zukuWifiMetrics: UtilityMetrics | null;
+  fuel: UtilityTransaction[];
+  fuelMetrics: UtilityMetrics | null;
   chartData: any[];
 }
 
@@ -55,9 +60,9 @@ export const useUtilityData = () => {
     kplc: '/utility_module/kplc/',
     kplcMetrics: '/utility_module/kplc_metrics/',
     safaricomWifi: '/utility_module/safaricom_wifi/',
-    safaricomMetrics: '/utility_module/safaricom_wifi_metrics/',
+    safaricomWifiMetrics: '/utility_module/safaricom_wifi_metrics/',
     zukuWifi: '/utility_module/zuku_wifi/',
-    zukuMetrics: '/utility_module/zuku_wifi_metrics/',
+    zukuWifiMetrics: '/utility_module/zuku_wifi_metrics/',
     fuel: '/utility_module/fuel/',
     fuelMetrics: '/utility_module/fuel_metrics/'
   };
@@ -103,29 +108,29 @@ export const useUtilityData = () => {
     let hasError = false;
     let errorMessage = '';
     
-    // Process each endpoint individually
+    // Helper function to safely fetch data from endpoints
+    const safelyFetchData = async (endpointUrl: string, fallbackData: any = []) => {
+      try {
+        return await fetchWithRetry(`${server}${endpointUrl}`);
+      } catch (error) {
+        console.error(`Error fetching from ${endpointUrl}:`, error);
+        hasError = true;
+        // Use cached data if available or fallback
+        return state.data ? (state.data[endpointUrl.split('/').pop() as keyof UtilityData] || fallbackData) : fallbackData;
+      }
+    };
+    
     try {
-      // Fetch bills data
-      results.bills = await fetchWithRetry(`${server}${endpoints.bills}`);
-      
-      // Fetch KPLC transactions
-      results.kplcTransactions = await fetchWithRetry(`${server}${endpoints.kplc}`);
-      
-      // Fetch KPLC metrics
-      results.kplcMetrics = await fetchWithRetry(`${server}${endpoints.kplcMetrics}`);
-      
-      // Fetch WiFi status
-      const safaricomData = await fetchWithRetry(`${server}${endpoints.safaricomWifi}`);
-      const zukuData = await fetchWithRetry(`${server}${endpoints.zukuWifi}`);
-      
-      results.wifiStatus = {
-        safaricom: safaricomData.message || null,
-        zuku: zukuData.message || null
-      };
-      
-      // Fetch fuel status
-      const fuelData = await fetchWithRetry(`${server}${endpoints.fuel}`);
-      results.fuelStatus = fuelData.message || null;
+      // Fetch data from all endpoints
+      results.bills = await safelyFetchData(endpoints.bills, []);
+      results.kplcTransactions = await safelyFetchData(endpoints.kplc, []);
+      results.kplcMetrics = await safelyFetchData(endpoints.kplcMetrics, null);
+      results.safaricomWifi = await safelyFetchData(endpoints.safaricomWifi, []);
+      results.safaricomWifiMetrics = await safelyFetchData(endpoints.safaricomWifiMetrics, null);
+      results.zukuWifi = await safelyFetchData(endpoints.zukuWifi, []);
+      results.zukuWifiMetrics = await safelyFetchData(endpoints.zukuWifiMetrics, null);
+      results.fuel = await safelyFetchData(endpoints.fuel, []);
+      results.fuelMetrics = await safelyFetchData(endpoints.fuelMetrics, null);
       
     } catch (error) {
       console.error('Error fetching utility data:', error);
@@ -134,35 +139,33 @@ export const useUtilityData = () => {
       
       // Use cached data if available
       if (state.data) {
-        results.bills = results.bills || state.data.bills;
-        results.kplcTransactions = results.kplcTransactions || state.data.kplcTransactions;
-        results.kplcMetrics = results.kplcMetrics || state.data.kplcMetrics;
-        results.wifiStatus = results.wifiStatus || state.data.wifiStatus;
-        results.fuelStatus = results.fuelStatus || state.data.fuelStatus;
-      } else {
-        // Initialize with empty data structure if no cached data
-        results.bills = results.bills || [];
-        results.kplcTransactions = results.kplcTransactions || [];
-        results.kplcMetrics = results.kplcMetrics || null;
-        results.wifiStatus = results.wifiStatus || { safaricom: null, zuku: null };
-        results.fuelStatus = results.fuelStatus || null;
+        Object.keys(endpoints).forEach(key => {
+          const endpoint = key as keyof typeof endpoints;
+          results[endpoint] = results[endpoint] || state.data?.[endpoint as keyof UtilityData];
+        });
       }
     }
     
     // Transform KPLC data for the chart if available
     const chartData = results.kplcTransactions && results.kplcTransactions.length > 0
       ? results.kplcTransactions
-          .map((item: KplcTransaction) => ({
-            month: item.month_name,
-            amount: item.amount
-          }))
-          .sort((a: any, b: any) => {
-            // Handle potential date parsing issues
-            try {
-              return new Date(a.month).getTime() - new Date(b.month).getTime();
-            } catch (e) {
-              return 0;
+          .reduce((acc: any[], item: UtilityTransaction) => {
+            // Group by month for chart
+            const existingMonth = acc.find(x => x.month === item.month_name);
+            if (existingMonth) {
+              existingMonth.amount += item.amount;
+            } else {
+              acc.push({
+                month: item.month_name,
+                amount: item.amount
+              });
             }
+            return acc;
+          }, [])
+          .sort((a: any, b: any) => {
+            // Sort months correctly
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            return months.indexOf(a.month) - months.indexOf(b.month);
           })
       : [];
     
@@ -176,20 +179,8 @@ export const useUtilityData = () => {
       lastUpdated: new Date(),
     });
     
-    console.log("Utility data fetch completed");
-  }, [fetchWithRetry]); // Only depend on fetchWithRetry
-
-  // Calculate insights based on available data
-  const getInsights = useCallback(() => {
-    if (!state.data) return null;
-    
-    const { kplcMetrics } = state.data;
-    
-    return {
-      totalKplcSpending: kplcMetrics?.total_tranasacted_amount || 0,
-      avgMonthlyElectricity: kplcMetrics?.average_transacted_amount || 0,
-    };
-  }, [state.data]);
+    console.log("Utility data fetch completed", results);
+  }, [fetchWithRetry, state.data]); 
 
   // Function to manually refresh data
   const refreshData = useCallback(() => {
@@ -207,7 +198,6 @@ export const useUtilityData = () => {
   return {
     ...state,
     chartData: state.data?.chartData || [],
-    insights: getInsights(),
     refreshData,
     isPartialData: state.error !== null && state.data !== null,
   };

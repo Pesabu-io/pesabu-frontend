@@ -1,12 +1,16 @@
 'use client'
 
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from "react"; // Added React import
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import {  Upload, CheckCircle2, FileText, Lock, Shield } from "lucide-react";
+import { CheckCircle2, FileText, Lock, Shield, Loader2 } from "lucide-react"; // Removed Upload
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import UploadArea, { FileState } from "./upload/UploadArea";
+import VerificationDialogContent from "./upload/VerificationDialogContent";
+import UploadHeader from "./upload/UploadHeader";
+import InfoCards from "./upload/InfoCards"; // Import the new info cards component
 import {
   Dialog,
   DialogContent,
@@ -22,17 +26,11 @@ import {
 } from "@/components/ui/input-otp";
 import { motion } from "framer-motion";
 import { server } from "@/utils/util";
-
-type FileState = {
-  file: File;
-  name: string;
-  size: number;
-  type: string;
-};
+// Removed FileState type definition
 
 const UploadStatement = () => {
-  const [dragActive, setDragActive] = useState<boolean>(false);
-  const [selectedFile, setSelectedFile] = useState<FileState | null>(null);
+  const [selectedFile, setSelectedFile] = useState<FileState>(null); // Use imported FileState type
+  const [dragActive, setDragActive] = useState<boolean>(false); // Keep dragActive state here for UploadArea prop
   const [isVerificationOpen, setIsVerificationOpen] = useState<boolean>(false);
   const [verificationCode, setVerificationCode] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -40,52 +38,19 @@ const UploadStatement = () => {
   const [processingStage, setProcessingStage] = useState<string>("");
   const { toast } = useToast();
   const router = useRouter();
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const stageIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(e.type === "dragenter" || e.type === "dragover");
-  };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  // Cleanup intervals on component unmount
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (stageIntervalRef.current) clearInterval(stageIntervalRef.current);
+    };
+  }, []);
 
-    const files = e.dataTransfer.files;
-    if (files?.[0]?.type === "application/pdf") {
-      setSelectedFile({
-        file: files[0],
-        name: files[0].name,
-        size: files[0].size,
-        type: files[0].type
-      });
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Invalid file type",
-        description: "Please upload a PDF file",
-      });
-    }
-  };
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files?.[0]?.type === "application/pdf") {
-      setSelectedFile({
-        file: files[0],
-        name: files[0].name,
-        size: files[0].size,
-        type: files[0].type
-      });
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Invalid file type",
-        description: "Please upload a PDF file",
-      });
-    }
-  };
+  // Removed handleDrag, handleDrop, handleFileInput (moved to UploadArea)
 
   const handleSubmit = () => {
     if (!selectedFile) {
@@ -108,6 +73,17 @@ const UploadStatement = () => {
       });
       return;
     }
+
+    // Add null check for selectedFile to satisfy TypeScript
+    if (!selectedFile) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "No file selected. Please select a file again.",
+        });
+        setIsVerificationOpen(false); // Close the dialog if no file somehow
+        return;
+    }
   
     setIsUploading(true);
     const formData = new FormData();
@@ -123,31 +99,47 @@ const UploadStatement = () => {
       "Generating insights..."
     ];
     
-    let stageIndex = 0;
-    let progressValue = 0;
-    
-  
-    // Start with first stage
-    setProcessingStage(stages[0]);
-  
-    // Create the progress bar animation
-   const progressIntervalId = setInterval(() => {
-      // Calculate progress based on stages
-      const baseProgress = (stageIndex % stages.length) * (95 / stages.length);
-      const stageProgress = Math.min(95 / stages.length, Math.random() * 3);
-      
-      progressValue = Math.min(95, baseProgress + stageProgress);
-      setUploadProgress(progressValue);
-    }, 300);
-  
-    // Create the stage cycling - slower than original to give impression of actual work
-  const  stageIntervalId = setInterval(() => {
-      if (stageIndex < stages.length) {
-        setProcessingStage(stages[stageIndex]);
-        stageIndex++;
+    let currentStageIndex = 0;
+    const totalStages = stages.length;
+    const progressPerStage = 95 / totalStages; // Reserve last 5% for completion
+    let currentProgress = 0;
+
+    // Clear any existing intervals
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    if (stageIntervalRef.current) clearInterval(stageIntervalRef.current);
+
+    // Function to update progress smoothly within a stage
+    const updateProgress = () => {
+      const targetProgressForStage = (currentStageIndex + 1) * progressPerStage;
+      const increment = progressPerStage / (3000 / 100); // Simulate progress over 3 seconds per stage
+
+      progressIntervalRef.current = setInterval(() => {
+        currentProgress += increment;
+        if (currentProgress >= targetProgressForStage) {
+          currentProgress = targetProgressForStage; // Cap at stage target
+          setUploadProgress(Math.min(95, currentProgress));
+          if (progressIntervalRef.current) clearInterval(progressIntervalRef.current); // Stop incrementing for this stage
+        } else {
+          setUploadProgress(Math.min(95, currentProgress));
+        }
+      }, 100); // Update progress frequently for smoothness
+    };
+
+    // Function to advance to the next stage
+    const advanceStage = () => {
+      if (currentStageIndex < totalStages) {
+        setProcessingStage(stages[currentStageIndex]);
+        updateProgress(); // Start progress animation for the new stage
+        currentStageIndex++;
+      } else {
+         if (stageIntervalRef.current) clearInterval(stageIntervalRef.current); // Stop cycling stages
       }
-    }, 3000); // Longer interval to make processing feel more substantial
-  
+    };
+
+    // Start the process
+    advanceStage(); // Show the first stage immediately
+    stageIntervalRef.current = setInterval(advanceStage, 3000); // Advance stage every 3 seconds
+
     try {
       console.log("Attempting to connect to server...");
   
@@ -173,20 +165,20 @@ const UploadStatement = () => {
       }
   
       // Server processed successfully
-      
-      // Ensure we've shown all processing stages before completion
-      clearInterval(stageIntervalId);
-      
-      // Make sure we show the final stage
+
+      // Clear intervals immediately
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (stageIntervalRef.current) clearInterval(stageIntervalRef.current);
+      progressIntervalRef.current = null;
+      stageIntervalRef.current = null;
+
+      // Jump progress to 100% and show completion message
       setProcessingStage("Processing complete!");
       setUploadProgress(100);
-      
+
       // Wait a moment for the user to see the 100% completion
       await new Promise(resolve => setTimeout(resolve, 1200));
-      
-      // Clear intervals after the delay
-      clearInterval(progressIntervalId);
-      
+
       toast({
         title: "Success",
         description: "Statement uploaded and processed successfully",
@@ -209,9 +201,11 @@ localStorage.setItem('statementData', JSON.stringify(data.dataframe));
   
     } catch (error) {
       // Clear intervals on error
-      clearInterval(progressIntervalId);
-      clearInterval(stageIntervalId);
-      
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      if (stageIntervalRef.current) clearInterval(stageIntervalRef.current);
+      progressIntervalRef.current = null;
+      stageIntervalRef.current = null;
+
       toast({
         variant: "destructive",
         title: "Upload failed",
@@ -224,12 +218,7 @@ localStorage.setItem('statementData', JSON.stringify(data.dataframe));
       setProcessingStage("");
     }
   };
-  // Format file size
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + " bytes";
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-    else return (bytes / 1048576).toFixed(1) + " MB";
-  };
+  // Removed formatFileSize function (moved to lib/utils)
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -243,25 +232,8 @@ localStorage.setItem('statementData', JSON.stringify(data.dataframe));
             transition={{ duration: 0.5 }}
             className="max-w-3xl mx-auto"
           >
-            {/* Card header */}
-            <div className="mb-8">
-              <motion.h1 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-                className="text-2xl md:text-3xl font-bold text-pesabu-teal"
-              >
-                Statement Upload
-              </motion.h1>
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                className="text-gray-500 mt-2"
-              >
-                Upload your M-PESA statement to get personalized financial insights
-              </motion.p>
-            </div>
+            {/* Use UploadHeader component */}
+            <UploadHeader />
 
             {/* Main upload card */}
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
@@ -269,59 +241,13 @@ localStorage.setItem('statementData', JSON.stringify(data.dataframe));
               <div className="bg-gradient-to-r from-pesabu-teal to-pesabu-teal/80 h-4"></div>
               
               <div className="p-8 md:p-10">
-                {/* Upload area */}
-                <motion.div
-                  whileHover={{ scale: 1.01 }}
-                  className={`relative border-2 border-dashed rounded-2xl transition-all ${
-                    dragActive
-                      ? "border-pesabu-teal bg-pesabu-teal/5"
-                      : "border-gray-200 bg-gray-50/50"
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileInput}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  
-                  <div className="py-16 px-6">
-                    {selectedFile ? (
-                      <motion.div 
-                        initial={{ scale: 0.9 }}
-                        animate={{ scale: 1 }}
-                        className="flex flex-col items-center"
-                      >
-                        <div className="bg-pesabu-gold/10 rounded-full p-4 mb-4">
-                          <FileText className="h-12 w-12 text-pesabu-gold" />
-                        </div>
-                        <p className="text-xl font-medium mb-2 text-gray-800">{selectedFile.name}</p>
-                        <p className="text-sm text-gray-500 mb-2">
-                          {formatFileSize(selectedFile.size)} • PDF Document
-                        </p>
-                        <p className="text-sm text-pesabu-teal">
-                          File selected • Click to change
-                        </p>
-                      </motion.div>
-                    ) : (
-                      <motion.div className="flex flex-col items-center">
-                        <div className="bg-pesabu-teal/10 rounded-full p-4 mb-4">
-                          <Upload className="h-12 w-12 text-pesabu-teal" />
-                        </div>
-                        <p className="text-xl font-medium mb-2 text-gray-800">
-                          Drag & Drop your M-PESA statement
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          or click to browse your files (PDF only)
-                        </p>
-                      </motion.div>
-                    )}
-                  </div>
-                </motion.div>
+                {/* Use UploadArea component */}
+                <UploadArea
+                  selectedFile={selectedFile}
+                  setSelectedFile={setSelectedFile}
+                  dragActive={dragActive}
+                  setDragActive={setDragActive}
+                />
 
                 {/* Security note */}
                 <div className="mt-8 flex items-center justify-center text-gray-500 text-sm">
@@ -344,109 +270,29 @@ localStorage.setItem('statementData', JSON.stringify(data.dataframe));
                 </div>
               </div>
             </div>
+
+            {/* Use InfoCards component */}
+            <InfoCards />
             
-            {/* Info cards */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="grid md:grid-cols-3 gap-6 mt-8"
-            >
-              {[
-                {
-                  icon: <FileText className="h-5 w-5 text-pesabu-gold" />,
-                  title: "Statement Analysis",
-                  description: "We analyze your transactions to provide financial insights"
-                },
-                {
-                  icon: <Lock className="h-5 w-5 text-pesabu-gold" />,
-                  title: "Secure Processing",
-                  description: "Your data is encrypted and processed securely"
-                },
-                {
-                  icon: <CheckCircle2 className="h-5 w-5 text-pesabu-gold" />,
-                  title: "Rich Insights",
-                  description: "Get personalized recommendations based on your transactions"
-                }
-              ].map((card, index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{ y: -5 }}
-                  className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm"
-                >
-                  <div className="bg-pesabu-gold/10 rounded-full p-2 inline-flex mb-3">
-                    {card.icon}
-                  </div>
-                  <h3 className="font-medium text-gray-800 mb-1">{card.title}</h3>
-                  <p className="text-sm text-gray-500">{card.description}</p>
-                </motion.div>
-              ))}
-            </motion.div>
           </motion.div>
         </main>
       </div>
 
     {/* Verification Dialog */}
-<Dialog open={isVerificationOpen} onOpenChange={setIsVerificationOpen}>
-  <DialogContent className="sm:max-w-md bg-white rounded-2xl">
-    <DialogHeader>
-      <DialogTitle className="text-2xl font-bold text-center text-pesabu-teal">Statement Password</DialogTitle>
-      <DialogDescription className="text-center mt-2">
-        Enter the 6-digit password provided with your M-PESA statement
-      </DialogDescription>
-    </DialogHeader>
-    {isUploading ? (
-      <div className="py-8 flex flex-col items-center space-y-6">
-        <div className="w-full bg-gray-100 rounded-full h-2.5">
-          <motion.div
-            className="bg-pesabu-teal h-2.5 rounded-full"
-            initial={{ width: "0%" }}
-            animate={{ width: `${uploadProgress}%` }}
-            transition={{ duration: 0.5 }}
-          />
-        </div>
-        <p className="text-pesabu-teal font-medium">{processingStage || "Processing..."}</p>
-        <div className="animate-pulse flex space-x-2 justify-center">
-          <div className="w-2 h-2 bg-pesabu-teal rounded-full"></div>
-          <div className="w-2 h-2 bg-pesabu-teal rounded-full animation-delay-200"></div>
-          <div className="w-2 h-2 bg-pesabu-teal rounded-full animation-delay-400"></div>
-        </div>
-      </div>
-    ) : (
-      <div className="flex flex-col items-center space-y-6 py-4">
-        <InputOTP
-          maxLength={6}
-          value={verificationCode}
-          onChange={setVerificationCode}
-          className="gap-3"
-        >
-          <InputOTPGroup>
-            <InputOTPSlot index={0} className="rounded-xl h-14 w-14 text-xl" />
-            <InputOTPSlot index={1} className="rounded-xl h-14 w-14 text-xl" />
-            <InputOTPSlot index={2} className="rounded-xl h-14 w-14 text-xl" />
-            <InputOTPSlot index={3} className="rounded-xl h-14 w-14 text-xl" />
-            <InputOTPSlot index={4} className="rounded-xl h-14 w-14 text-xl" />
-            <InputOTPSlot index={5} className="rounded-xl h-14 w-14 text-xl" />
-          </InputOTPGroup>
-        </InputOTP>
-        <Button
-          onClick={handleVerification}
-          className="w-full bg-pesabu-teal hover:bg-pesabu-teal/90 py-6 h-auto text-lg rounded-xl font-medium shadow transition-all"
-          disabled={verificationCode.length !== 6}
-        >
-          Verify & Process
-        </Button>
-      </div>
-    )}
-    <DialogFooter className="sm:justify-center mt-2">
-      <p className="text-xs text-gray-500 text-center flex items-center justify-center">
-        <Lock className="h-3 w-3 mr-1" />
-        This password is provided in your statement PDF
-      </p>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-</div>
+    <Dialog open={isVerificationOpen} onOpenChange={setIsVerificationOpen}>
+      <DialogContent className="sm:max-w-md bg-white rounded-2xl">
+        {/* Use VerificationDialogContent component */}
+        <VerificationDialogContent
+          isUploading={isUploading}
+          uploadProgress={uploadProgress}
+          processingStage={processingStage}
+          verificationCode={verificationCode}
+          setVerificationCode={setVerificationCode}
+          handleVerification={handleVerification}
+        />
+      </DialogContent>
+    </Dialog>
+    </div>
 );
 };
 
