@@ -11,23 +11,22 @@ import {
     PackageSearch, Users, List, ProportionsIcon, StarIcon,
     ChartPie,
     Layers3,
-    FerrisWheel
+    FerrisWheel,
+    Building2,
+    Zap
   } from "lucide-react";
   
 
-  export const server = 'http://0.0.0.0:8000';
+  export const server = 'http://164.68.115.204:8000';
   
   export const mainMenuItems = [
     { name: "Home", icon: HomeIcon, href: "/", color: "text-blue-500" },
-    { name: "Mpesa Analyzer", icon: PackageSearch, href: "/products", color: "text-green-500" },
-    
-
- 
-    { name: "Loan Management System", icon: List, href: "/orders", color: "text-red-500" },
-    
-  { name: "Credit Scoring Engine", icon: ChartPie, href: "/reports", color: "text-purple-500" },
-
-
+    { name: "Insights", icon: ChartPie, href: "/insights", color: "text-green-500" },
+    { name: "Transactions", icon: List, href: "/transactions", color: "text-orange-500" },
+    { name: "Lifestyle", icon: FerrisWheel, href: "/lifestyle", color: "text-purple-500" },
+    { name: "Financial Institutions", icon: Building2, href: "/financial-institutions", color: "text-indigo-500" },
+    { name: "Credit Score", icon: StarIcon, href: "/credit-score", color: "text-red-500" },
+    { name: "Utilities", icon: Zap, href: "/utilities", color: "text-yellow-500" },
   ];
 
   export const dummyReports = [

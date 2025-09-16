@@ -1,500 +1,563 @@
 'use client'
 
-import React from "react";
-import { Card } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,  } from 'recharts';
-import { Clock, TrendingUp, ArrowUpCircle, ArrowDownCircle, Wallet, CreditCard, Building, ArrowRightLeft, Activity, CheckCircle2, AlertCircle,  } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertTitle, AlertDescription } from "./ui/alert";
-import InsightsTabContent from "./InsightsTabContent";
-import { useFinancialInstitutionsData } from "@/hooks/useFinancialInstitutionsData";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Building2, 
+  TrendingUp, 
+  TrendingDown, 
+  CreditCard, 
+  PiggyBank,
+  Loader2, 
+  AlertCircle,
+  BarChart3,
+  PieChart,
+  Banknote,
+  Calendar
+} from 'lucide-react';
+import { server } from '@/utils/util';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  PieChart as RechartsPieChart, 
+  Pie, 
+  Cell,
+  LineChart,
+  Line
+} from 'recharts';
 
-
-const FinancialInstitutions: React.FC = () => {
-
-
-
-  const { data, isLoading, error,  } = useFinancialInstitutionsData();
-  
-
-  if (isLoading && !data) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-lg">Loading dashboard data...</div>
-    </div>
-  );
-
-  if (error) return (
-    <div className="p-6 text-red-500 flex items-center justify-center">
-      <div>Error loading dashboard: {error}</div>
-    </div>
-  );
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
-
-
-    // Helper function to calculate bank usage trends
-    const calculateBankTrends = () => {
-      const transactions = data.safaricomServices?.transactions || [];
-      const bankFrequency: { [key: string]: number } = {};
-      
-      transactions.forEach(tx => {
-        if (tx.Bank) {
-          bankFrequency[tx.Bank] = (bankFrequency[tx.Bank] || 0) + 1;
-        }
-      });
-  
-      return Object.entries(bankFrequency)
-        .map(([bank, count]) => ({ bank, count }))
-        .sort((a, b) => b.count - a.count);
-    };
-  
-    // Helper function to get transaction success rate
-    const getTransactionSuccessRate = () => {
-      const transactions = data.safaricomServices?.transactions || [];
-      const total = transactions.length;
-      const successful = transactions.filter(tx => tx["Paid In"] > 0 || tx["Withdrawn"] > 0).length;
-      return total ? Math.round((successful / total) * 100) : 0;
-    };
-
-
-     // New component for Financial Health Score
-  const FinancialHealthScore = () => {
-    const calculateScore = () => {
-      let score = 0;
-      
-      // Factor 1: Fuliza loan management
-      const fulizaMetrics = data.fulizaMetrics;
-      if (fulizaMetrics) {
-        if (fulizaMetrics.total_loan_balance >= 0) score += 25;
-        if (fulizaMetrics.total_loan_paid_back_amount > fulizaMetrics.total_loan_disbursed_amount) score += 15;
-      }
-
-      // Factor 2: Transaction diversity
-      const bankTrends = calculateBankTrends();
-      if (bankTrends.length >= 3) score += 20;
-
-      // Factor 3: Regular income
-      const receivedMetrics = data.receivedMetrics;
-      if (receivedMetrics && receivedMetrics.total_amount_received > 0) score += 20;
-
-      // Factor 4: Transaction success rate
-      const successRate = getTransactionSuccessRate();
-      if (successRate > 90) score += 20;
-
-      return score;
-    };
-
-    const score = calculateScore();
-    const getHealthStatus = (score: number) => {
-      if (score >= 80) return { text: 'Excellent', color: 'text-green-500' };
-      if (score >= 60) return { text: 'Good', color: 'text-blue-500' };
-      if (score >= 40) return { text: 'Fair', color: 'yellow-500' };
-      return { text: 'Needs Improvement', color: 'text-red-500' };
-    };
-
-    const status = getHealthStatus(score);
-
-    return (
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Activity className="h-5 w-5" />
-          Financial Health Score
-        </h3>
-        <div className="flex items-center justify-between">
-          <div className="text-4xl font-bold">{score}/100</div>
-          <div className={`text-lg font-semibold ${status.color}`}>{status.text}</div>
-        </div>
-        <div className="mt-4 space-y-2">
-          <div className="text-sm text-gray-600">Key Factors:</div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <span>Loan Management</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <span>Transaction Diversity</span>
-            </div>
-          </div>
-        </div>
-      </Card>
-    );
+interface FinancialInstitutionsData {
+  clientBanks?: {
+    banks: string[];
+    transactions: any[];
+    count: number;
   };
+  bankReceivedSummary?: {
+    total_amount_received: number;
+    highest_amount_received: number;
+    lowest_amount_received: number;
+    highest_amount_bank: string;
+    lowest_amount_bank: string;
+  };
+  bankSentSummary?: {
+    total_amount_sent: number;
+    highest_amount_sent: number;
+    lowest_amount_sent: number;
+    highest_amount_bank: string;
+    lowest_amount_bank: string;
+  };
+  topFiveReceivedCount?: {
+    top_five_banks: Array<{
+      bank: string;
+      count: number;
+    }>;
+  };
+  topFiveSentCount?: {
+    top_five_banks: Array<{
+      bank: string;
+      count: number;
+    }>;
+  };
+  mshwariTransactions?: {
+    mshwari_transactions: any[];
+    count: number;
+  };
+  mshwariLoanSummary?: {
+    total_loan_count: number;
+    highest_loan_disbursed: number;
+    highest_loan_paid_back: number;
+    date_of_last_loan_disbursement: string;
+    date_of_last_loan_repayment: string;
+    last_amount_borrowed: number;
+    last_amount_paid_back: number;
+    total_loan_disbursed_amount: number;
+    total_loan_paid_back_amount: number;
+  };
+  fulizaUsage?: {
+    fuliza_usage: any[];
+  };
+  fulizaLoanSummary?: {
+    total_loan_count: number;
+    highest_loan_disbursed: number;
+    highest_loan_paid_back: number;
+    date_of_last_loan_disbursement: string;
+    date_of_last_loan_repayment: string;
+    last_amount_borrowed: number;
+    last_amount_paid_back: number;
+    total_loan_disbursed_amount: number;
+    total_loan_paid_back_amount: number;
+    total_loan_balance: number;
+  };
+}
 
-    // New component for Transaction Insights
-    const TransactionInsights = () => {
-      const insights = [
-        {
-          title: "Most Active Time",
-          value: "2-4 PM",
-          icon: <Clock className="h-5 w-5" />,
-          trend: "+15% vs last month"
-        },
-        {
-          title: "Preferred Bank",
-          value: calculateBankTrends()[0]?.bank || "N/A",
-          icon: <Building className="h-5 w-5" />,
-          trend: "Used in 45% of transactions"
-        },
-        {
-          title: "Success Rate",
-          value: `${getTransactionSuccessRate()}%`,
-          icon: <CheckCircle2 className="h-5 w-5" />,
-          trend: "↑ 5% improvement"
-        }
+const FinancialInstitutions = () => {
+  const [data, setData] = useState<FinancialInstitutionsData>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchFinancialInstitutionsData();
+  }, []);
+
+  const fetchFinancialInstitutionsData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const endpoints = [
+        'client_banks/',
+        'bank_received_summary_metrics/',
+        'bank_sent_summary_metrics/',
+        'top_five_received_count/',
+        'top_five_sent_count/',
+        'identify_mshwari_financial_transactions/',
+        'mshwari_loan_summary/',
+        'fuliza_usage/',
+        'fuliza_loan_summary/'
       ];
-  
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {insights.map((insight, index) => (
-            <Card key={index} className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                {insight.icon}
-                <h4 className="font-semibold">{insight.title}</h4>
-              </div>
-              <div className="text-2xl font-bold mb-1">{insight.value}</div>
-              <div className="text-sm text-gray-600">{insight.trend}</div>
-            </Card>
-          ))}
-        </div>
+
+      const responses = await Promise.all(
+        endpoints.map(endpoint => fetch(`${server}/financial_institutions_module/${endpoint}`))
       );
-    };
 
-      // New component for Risk Alerts
-  const RiskAlerts = () => {
-    const fulizaMetrics = data.fulizaMetrics;
-    const alerts = [];
+      const results = await Promise.all(
+        responses.map(response => response.json())
+      );
 
-    if (fulizaMetrics && fulizaMetrics.total_loan_balance > 0) {
-      alerts.push({
-        title: "Outstanding Fuliza Balance",
-        description: `You have KES ${fulizaMetrics.total_loan_balance.toLocaleString()} pending. Consider clearing this soon.`
+      const financialData: FinancialInstitutionsData = {};
+      
+      endpoints.forEach((endpoint, index) => {
+        const result = results[index];
+        
+        if (!result.message && !result.error) {
+          switch (endpoint) {
+            case 'client_banks/':
+              financialData.clientBanks = {
+                banks: result[0] || [],
+                transactions: result[1]?.transactions || [],
+                count: result[1]?.count || 0
+              };
+              break;
+            case 'bank_received_summary_metrics/':
+              financialData.bankReceivedSummary = result;
+              break;
+            case 'bank_sent_summary_metrics/':
+              financialData.bankSentSummary = result;
+              break;
+            case 'top_five_received_count/':
+              financialData.topFiveReceivedCount = result;
+              break;
+            case 'top_five_sent_count/':
+              financialData.topFiveSentCount = result;
+              break;
+            case 'identify_mshwari_financial_transactions/':
+              financialData.mshwariTransactions = result;
+              break;
+            case 'mshwari_loan_summary/':
+              financialData.mshwariLoanSummary = result;
+              break;
+            case 'fuliza_usage/':
+              financialData.fulizaUsage = result;
+              break;
+            case 'fuliza_loan_summary/':
+              financialData.fulizaLoanSummary = result;
+              break;
+          }
+        }
       });
-    }
 
-    if (getTransactionSuccessRate() < 90) {
-      alerts.push({
-        title: "Transaction Success Rate Below Target",
-        description: "Your transaction success rate is below 90%. This might indicate some failed transactions."
-      });
+      setData(financialData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch financial institutions data');
+    } finally {
+      setIsLoading(false);
     }
-
-    return alerts.length > 0 ? (
-      <div className="space-y-4">
-        {alerts.map((alert, index) => (
-          <Alert key={index}>
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>{alert.title}</AlertTitle>
-            <AlertDescription>{alert.description}</AlertDescription>
-          </Alert>
-        ))}
-      </div>
-    ) : null;
   };
-  
-  const TransactionsTab = () => (
 
-    <div className="space-y-6">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Building className="h-5 w-5" />
-          Recent  Transactions
-        </h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Bank</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Type</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.safaricomServices?.transactions?.slice(0, 5).map((tx, index) => (
-              <TableRow key={index}>
-                <TableCell>{tx.Bank || 'N/A'}</TableCell>
-                <TableCell className={tx["Paid In"] > 0 ? 'text-green-600' : 'text-red-600'}>
-                  KES {Math.abs(tx["Paid In"] || tx["Withdrawn"] || 0).toLocaleString()}
-                </TableCell>
-                <TableCell>{tx.Transaction_Type}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
-
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <ArrowRightLeft className="h-5 w-5" />
-          Transaction Statistics
-        </h3>
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm text-gray-600">Total Transactions Value</p>
-            <p className="text-2xl font-bold">
-              KES {(data.receivedMetrics?.total_amount_received + (data.sentMetrics?.total_amount_sent || 0)).toLocaleString()}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">Largest Transaction</p>
-            <p className="text-2xl font-bold">
-              KES {Math.max(
-                data.receivedMetrics?.highest_amount_received || 0,
-                data.sentMetrics?.highest_amount_sent || 0
-              ).toLocaleString()}
-            </p>
-          </div>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading financial institutions data...</p>
         </div>
-      </Card>
-    </div>
-
-    <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">Transaction History</h3>
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={[
-              { name: 'Received', amount: data.receivedMetrics?.total_amount_received || 0 },
-
-              { name: 'Sent', amount: data.sentMetrics?.total_amount_sent || 0 }
-            ]}
-          >
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="amount" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
       </div>
-    </Card>
-    </div>
-);
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <AlertCircle className="h-8 w-8 text-red-500" />
+              <p className="text-muted-foreground">{error}</p>
+              <button 
+                onClick={fetchFinancialInstitutionsData}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              >
+                Retry
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Prepare data for charts
+  const bankReceivedData = data.topFiveReceivedCount?.top_five_banks?.map(item => ({
+    name: item.bank,
+    count: item.count,
+    color: `hsl(${Math.random() * 360}, 70%, 50%)`
+  })) || [];
+
+  const bankSentData = data.topFiveSentCount?.top_five_banks?.map(item => ({
+    name: item.bank,
+    count: item.count,
+    color: `hsl(${Math.random() * 360}, 70%, 50%)`
+  })) || [];
 
   return (
-    <div className="space-y-6 p-6">
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="digital">Digital Banking</TabsTrigger>
-          <TabsTrigger value="insights">Insights</TabsTrigger>
+    <div className="space-y-8 p-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Financial Institutions</h1>
+          <p className="text-muted-foreground">Bank transactions, M-Shwari, and Fuliza analytics</p>
+        </div>
+        <button 
+          onClick={fetchFinancialInstitutionsData}
+          className="p-2 rounded-md bg-muted hover:bg-muted/80"
+        >
+          <Loader2 className="h-4 w-4" />
+        </button>
+      </div>
 
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          {/* Money Flow Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-6 bg-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Total Received</h3>
-                  <p className="text-3xl font-bold text-green-600 mt-2">
-                    KES {data.receivedMetrics?.total_amount_received.toLocaleString()}
-                  </p>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Bank Transactions */}
+        <Card className="overflow-hidden border-t-4 border-t-blue-500">
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-blue-500" />
+                  <h3 className="font-medium">Bank Transactions</h3>
                 </div>
-                <ArrowUpCircle className="text-green-500 h-8 w-8" />
+                <p className="text-3xl font-bold mt-2">
+                  {data.clientBanks?.count || 0}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {data.clientBanks?.banks?.length || 0} banks
+                </p>
               </div>
-              <div className="mt-4 text-sm text-gray-600">
-                <div>Highest: KES {data.receivedMetrics?.highest_amount_received.toLocaleString()} ({data.receivedMetrics?.highest_amount_bank})</div>
-                <div>Lowest: KES {data.receivedMetrics?.lowest_amount_received.toLocaleString()} ({data.receivedMetrics?.lowest_amount_bank})</div>
-              </div>
-            </Card>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                Active
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card className="p-6 bg-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Total Sent</h3>
-                  <p className="text-3xl font-bold text-red-600 mt-2">
-                    KES {data.sentMetrics?.total_amount_sent.toLocaleString()}
-                  </p>
+        {/* M-Shwari */}
+        <Card className="overflow-hidden border-t-4 border-t-green-500">
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="flex items-center gap-2">
+                  <PiggyBank className="h-5 w-5 text-green-500" />
+                  <h3 className="font-medium">M-Shwari</h3>
                 </div>
-                <ArrowDownCircle className="text-red-500 h-8 w-8" />
+                <p className="text-3xl font-bold mt-2">
+                  {data.mshwariTransactions?.count || 0}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {data.mshwariLoanSummary?.total_loan_count || 0} loans
+                </p>
               </div>
-              <div className="mt-4 text-sm text-gray-600">
-                <div>Highest: KES {data.sentMetrics?.highest_amount_sent.toLocaleString()} ({data.sentMetrics?.highest_amount_bank})</div>
-                <div>Lowest: KES {data.sentMetrics?.lowest_amount_sent.lowest_sent_amount.toLocaleString()} ({data.sentMetrics?.lowest_amount_bank})</div>
-              </div>
-            </Card>
+              <Badge variant="outline" className="bg-green-50 text-green-700">
+                KES {data.mshwariLoanSummary?.total_loan_disbursed_amount?.toLocaleString() || '0'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card className="p-6 bg-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Net Flow</h3>
-                  <p className={`text-3xl font-bold mt-2 ${
-                    (data.receivedMetrics?.total_amount_received || 0) - (data.sentMetrics?.total_amount_sent || 0) > 0 
-                    ? 'text-green-600' 
-                    : 'text-red-600'
-                  }`}>
-                    KES {((data.receivedMetrics?.total_amount_received || 0) - (data.sentMetrics?.total_amount_sent || 0)).toLocaleString()}
-                  </p>
+        {/* Fuliza */}
+        <Card className="overflow-hidden border-t-4 border-t-red-500">
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-red-500" />
+                  <h3 className="font-medium">Fuliza</h3>
                 </div>
-                <TrendingUp className="text-blue-500 h-8 w-8" />
+                <p className="text-3xl font-bold mt-2">
+                  {data.fulizaLoanSummary?.total_loan_count || 0}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  KES {data.fulizaLoanSummary?.total_loan_balance?.toLocaleString() || '0'} balance
+                </p>
               </div>
-            </Card>
-          </div>
+              <Badge variant="outline" className="bg-red-50 text-red-700">
+                KES {data.fulizaLoanSummary?.total_loan_disbursed_amount?.toLocaleString() || '0'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Bank Rankings */}
-                   {/* Updated Bank Rankings */}
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Banks by Received Transactions</h3>
-              <div className="h-64">
+        {/* Bank Summary */}
+        <Card className="overflow-hidden border-t-4 border-t-purple-500">
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Banknote className="h-5 w-5 text-purple-500" />
+                  <h3 className="font-medium">Bank Activity</h3>
+                </div>
+                <p className="text-3xl font-bold mt-2">
+                  KES {data.bankReceivedSummary?.total_amount_received?.toLocaleString() || '0'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Total received
+                </p>
+              </div>
+              <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                KES {data.bankSentSummary?.total_amount_sent?.toLocaleString() || '0'} sent
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Banks by Received Count */}
+        {bankReceivedData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Top Banks by Received Count
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={data.topReceived?.top_five_banks.map(item => ({
-                        name: item.bank,
-                        value: item.count
-                      }))}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({name, value}) => `${name}: ${value}`}
-                    >
-                      {data.topReceived?.top_five_banks.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
+                  <BarChart data={bankReceivedData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                    <YAxis />
                     <Tooltip />
-                  </PieChart>
+                    <Bar dataKey="count" fill="#8884d8" />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
-            </Card>
+            </CardContent>
+          </Card>
+        )}
 
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Banks by Sent Transactions</h3>
-              <div className="h-64">
+        {/* Top Banks by Sent Count */}
+        {bankSentData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Top Banks by Sent Count
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={data.topSent?.top_five_banks.map(item => ({
-                        name: item.bank,
-                        value: item.count
-                      }))}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({name, value}) => `${name}: ${value}`}
-                    >
-                      {data.topSent?.top_five_banks.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
+                  <BarChart data={bankSentData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                    <YAxis />
                     <Tooltip />
-                  </PieChart>
+                    <Bar dataKey="count" fill="#8884d8" />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
-            </Card>
-            </div>
-        </TabsContent>
-
-        <TabsContent value="transactions">
-          <TransactionsTab />
-        </TabsContent>
-
-        <TabsContent value="digital" className="space-y-6">
-          {/* Fuliza Summary */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">Fuliza Loan Summary</h3>
-              <CreditCard className="text-blue-500 h-6 w-6" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <div className="text-sm text-gray-600">Total Loans</div>
-                <div className="text-2xl font-bold">{data.fulizaMetrics?.total_loan_count}</div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-600">Total Disbursed</div>
-                <div className="text-2xl font-bold text-green-600">
-                  KES {data.fulizaMetrics?.total_loan_disbursed_amount.toLocaleString()}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-600">Total Paid Back</div>
-                <div className="text-2xl font-bold text-blue-600">
-                  KES {data.fulizaMetrics?.total_loan_paid_back_amount.toLocaleString()}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-600">Highest Loan</div>
-                <div className="text-2xl font-bold">
-                  KES {data.fulizaMetrics?.highest_loan_disbursed.toLocaleString()}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-600">Last Borrowed</div>
-                <div className="text-2xl font-bold">
-                  KES {data.fulizaMetrics?.last_amount_borrowed.toLocaleString()}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-600">Current Balance</div>
-                <div className={`text-2xl font-bold ${data.fulizaMetrics?.total_loan_balance < 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  KES {Math.abs(data.fulizaMetrics?.total_loan_balance || 0).toLocaleString()}
-                </div>
-              </div>
-            </div>
+            </CardContent>
           </Card>
+        )}
+      </div>
 
-          {/* Recent Fuliza Transactions */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">Recent Fuliza Transactions</h3>
-              <Wallet className="text-blue-500 h-6 w-6" />
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Details</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Type</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.fulizaTransactions?.slice(0, 5).map((tx, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{new Date(tx["Completion Time"]).toLocaleString()}</TableCell>
-                    <TableCell className="max-w-md truncate">{tx.Details}</TableCell>
-                    <TableCell className={tx["Paid In"] > 0 ? 'text-green-600' : 'text-red-600'}>
-                      KES {(tx["Paid In"] || tx["Withdrawn"]).toLocaleString()}
-                    </TableCell>
-                    <TableCell>{tx.Transaction_Type}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
-        </TabsContent>
+      {/* Detailed Analytics Tabs */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Detailed Financial Analytics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="banks">
+            <TabsList className="mb-4">
+              <TabsTrigger value="banks" className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-blue-500" />
+                Banks
+              </TabsTrigger>
+              <TabsTrigger value="mshwari" className="flex items-center gap-2">
+                <PiggyBank className="h-4 w-4 text-green-500" />
+                M-Shwari
+              </TabsTrigger>
+              <TabsTrigger value="fuliza" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-red-500" />
+                Fuliza
+              </TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="insights" className="space-y-6">
-              <FinancialHealthScore />
-      
-              <InsightsTabContent 
-    calculateBankTrends={calculateBankTrends}
-    getTransactionSuccessRate={getTransactionSuccessRate}
-    FinancialHealthScore={FinancialHealthScore}
-    TransactionInsights={TransactionInsights}
-    RiskAlerts={RiskAlerts}
-  />
+            {/* Banks Tab */}
+            <TabsContent value="banks">
+              <div className="space-y-6">
+                {/* Bank Summary Metrics */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <TrendingUp className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Highest Received</p>
+                    <p className="font-bold">KES {data.bankReceivedSummary?.highest_amount_received?.toLocaleString() || '0'}</p>
+                    <p className="text-xs text-muted-foreground">{data.bankReceivedSummary?.highest_amount_bank || 'N/A'}</p>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <TrendingDown className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Lowest Received</p>
+                    <p className="font-bold">KES {data.bankReceivedSummary?.lowest_amount_received?.toLocaleString() || '0'}</p>
+                    <p className="text-xs text-muted-foreground">{data.bankReceivedSummary?.lowest_amount_bank || 'N/A'}</p>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <TrendingUp className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Highest Sent</p>
+                    <p className="font-bold">KES {data.bankSentSummary?.highest_amount_sent?.toLocaleString() || '0'}</p>
+                    <p className="text-xs text-muted-foreground">{data.bankSentSummary?.highest_amount_bank || 'N/A'}</p>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <TrendingDown className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Lowest Sent</p>
+                    <p className="font-bold">KES {data.bankSentSummary?.lowest_amount_sent?.toLocaleString() || '0'}</p>
+                    <p className="text-xs text-muted-foreground">{data.bankSentSummary?.lowest_amount_bank || 'N/A'}</p>
+                  </div>
+                </div>
 
-      <TransactionInsights />
-      <RiskAlerts />
-        </TabsContent>
-      </Tabs>
+                {/* Connected Banks */}
+                {data.clientBanks?.banks && data.clientBanks.banks.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Connected Banks</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {data.clientBanks.banks.map((bank, index) => (
+                        <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700">
+                          {bank}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* M-Shwari Tab */}
+            <TabsContent value="mshwari">
+              {data.mshwariLoanSummary ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <PiggyBank className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Total Loans</p>
+                      <p className="font-bold">{data.mshwariLoanSummary.total_loan_count}</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <TrendingUp className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Highest Disbursed</p>
+                      <p className="font-bold">KES {data.mshwariLoanSummary.highest_loan_disbursed.toLocaleString()}</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <TrendingDown className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Highest Repaid</p>
+                      <p className="font-bold">KES {data.mshwariLoanSummary.highest_loan_paid_back.toLocaleString()}</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <Calendar className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Last Disbursement</p>
+                      <p className="font-bold text-xs">
+                        {new Date(data.mshwariLoanSummary.date_of_last_loan_disbursement).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <h4 className="font-semibold mb-2">Loan Summary</h4>
+                      <p className="text-sm">Total Disbursed: KES {data.mshwariLoanSummary.total_loan_disbursed_amount.toLocaleString()}</p>
+                      <p className="text-sm">Total Repaid: KES {data.mshwariLoanSummary.total_loan_paid_back_amount.toLocaleString()}</p>
+                      <p className="text-sm">Last Borrowed: KES {data.mshwariLoanSummary.last_amount_borrowed.toLocaleString()}</p>
+                      <p className="text-sm">Last Repaid: KES {data.mshwariLoanSummary.last_amount_paid_back.toLocaleString()}</p>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <h4 className="font-semibold mb-2">Recent Activity</h4>
+                      <p className="text-sm">Last Repayment: {new Date(data.mshwariLoanSummary.date_of_last_loan_repayment).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">No M-Shwari data available</div>
+              )}
+            </TabsContent>
+
+            {/* Fuliza Tab */}
+            <TabsContent value="fuliza">
+              {data.fulizaLoanSummary ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                      <CreditCard className="h-6 w-6 text-red-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Total Loans</p>
+                      <p className="font-bold">{data.fulizaLoanSummary.total_loan_count}</p>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                      <TrendingUp className="h-6 w-6 text-red-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Highest Disbursed</p>
+                      <p className="font-bold">KES {data.fulizaLoanSummary.highest_loan_disbursed.toLocaleString()}</p>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                      <TrendingDown className="h-6 w-6 text-red-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Highest Repaid</p>
+                      <p className="font-bold">KES {data.fulizaLoanSummary.highest_loan_paid_back.toLocaleString()}</p>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                      <Calendar className="h-6 w-6 text-red-500 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">Last Disbursement</p>
+                      <p className="font-bold text-xs">
+                        {new Date(data.fulizaLoanSummary.date_of_last_loan_disbursement).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 bg-red-50 rounded-lg">
+                      <h4 className="font-semibold mb-2">Loan Summary</h4>
+                      <p className="text-sm">Total Disbursed: KES {data.fulizaLoanSummary.total_loan_disbursed_amount.toLocaleString()}</p>
+                      <p className="text-sm">Total Repaid: KES {data.fulizaLoanSummary.total_loan_paid_back_amount.toLocaleString()}</p>
+                      <p className="text-sm">Current Balance: KES {data.fulizaLoanSummary.total_loan_balance.toLocaleString()}</p>
+                      <p className="text-sm">Last Borrowed: KES {data.fulizaLoanSummary.last_amount_borrowed.toLocaleString()}</p>
+                    </div>
+                    <div className="p-4 bg-red-50 rounded-lg">
+                      <h4 className="font-semibold mb-2">Recent Activity</h4>
+                      <p className="text-sm">Last Repayment: {new Date(data.fulizaLoanSummary.date_of_last_loan_repayment).toLocaleDateString()}</p>
+                      <p className="text-sm">Last Repaid: KES {data.fulizaLoanSummary.last_amount_paid_back.toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">No Fuliza data available</div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };

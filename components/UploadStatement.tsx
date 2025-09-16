@@ -36,17 +36,19 @@ const UploadStatement = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [processingStage, setProcessingStage] = useState<string>("");
+  const [taskId, setTaskId] = useState<string>("");
+  const [uploadStatus, setUploadStatus] = useState<string>("");
   const { toast } = useToast();
   const router = useRouter();
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const stageIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const statusPollingRef = useRef<NodeJS.Timeout | null>(null);
 
 
   // Cleanup intervals on component unmount
   useEffect(() => {
     return () => {
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-      if (stageIntervalRef.current) clearInterval(stageIntervalRef.current);
+      if (statusPollingRef.current) clearInterval(statusPollingRef.current);
     };
   }, []);
 
@@ -62,6 +64,118 @@ const UploadStatement = () => {
       return;
     }
     setIsVerificationOpen(true);
+  };
+
+  // Function to poll status and update progress
+  const pollStatus = async (taskId: string) => {
+    try {
+      console.log(`Polling status for task ID: ${taskId}`);
+      const response = await fetch(`${server}/file/status/${taskId}`, {
+        method: "GET",
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+
+      console.log(`Status response status: ${response.status}`);
+
+      if (!response.ok) {
+        console.warn(`Status check failed with status ${response.status}, continuing to poll...`);
+        return; // Don't throw error, just continue polling
+      }
+
+      const statusData = await response.json();
+      console.log("Status response data:", statusData);
+
+      // Update progress and status
+      if (statusData.progress !== undefined) {
+        setUploadProgress(statusData.progress);
+        console.log(`Progress updated to: ${statusData.progress}%`);
+      }
+
+      if (statusData.status) {
+        setUploadStatus(statusData.status);
+        
+        // Use server message if available, otherwise use default messages
+        if (statusData.message) {
+          setProcessingStage(statusData.message);
+          console.log(`Using server message: ${statusData.message}`);
+        } else {
+          // Update processing stage based on status
+          switch (statusData.status) {
+            case 'processing':
+              setProcessingStage("Processing your statement...");
+              break;
+            case 'completed':
+              setProcessingStage("Processing complete!");
+              break;
+            case 'failed':
+              setProcessingStage("Processing failed");
+              break;
+            default:
+              setProcessingStage("Processing...");
+          }
+        }
+        console.log(`Status updated to: ${statusData.status}`);
+      }
+
+      // Handle completion
+      if (statusData.status === 'completed' && statusData.result) {
+        console.log("Processing completed successfully");
+        // Clear polling interval
+        if (statusPollingRef.current) {
+          clearInterval(statusPollingRef.current);
+          statusPollingRef.current = null;
+        }
+
+        // Wait a moment for the user to see the 100% completion
+        await new Promise(resolve => setTimeout(resolve, 1200));
+
+        toast({
+          title: "Success",
+          description: "Statement uploaded and processed successfully",
+        });
+
+        // Store the data and redirect
+        const { client_name, mobile_number, dataframe } = statusData.result;
+        
+        if (client_name) localStorage.setItem('statementClientName', client_name);
+        if (mobile_number) localStorage.setItem('statementMobileNumber', mobile_number);
+        if (dataframe) localStorage.setItem('statementData', JSON.stringify(dataframe));
+
+        setIsVerificationOpen(false);
+        setIsUploading(false);
+        router.push("/insights");
+        return;
+      }
+
+      // Handle failure
+      if (statusData.status === 'failed') {
+        console.error("Processing failed on the server");
+        if (statusPollingRef.current) {
+          clearInterval(statusPollingRef.current);
+          statusPollingRef.current = null;
+        }
+
+        toast({
+          variant: "destructive",
+          title: "Processing failed",
+          description: "The statement processing failed. Please try again.",
+        });
+
+        setIsUploading(false);
+        setUploadProgress(0);
+        setProcessingStage("");
+        return;
+      }
+
+    } catch (error) {
+      console.error("Error polling status:", error);
+      // Don't clear the polling interval on network errors
+      // Just log the error and continue polling
+      console.log("Continuing to poll despite error...");
+    }
   };
 
   const handleVerification = async () => {
@@ -86,125 +200,91 @@ const UploadStatement = () => {
     }
   
     setIsUploading(true);
+    setUploadProgress(0);
+    setProcessingStage("Uploading file...");
+    
     const formData = new FormData();
     formData.append("file", selectedFile.file);
     formData.append("password", verificationCode);
-  
-    // Processing stages for better UX
-    const stages = [
-      "Uploading statement...",
-      "Decrypting file...",
-      "Extracting transactions...",
-      "Analyzing financial data...",
-      "Generating insights..."
-    ];
-    
-    let currentStageIndex = 0;
-    const totalStages = stages.length;
-    const progressPerStage = 95 / totalStages; // Reserve last 5% for completion
-    let currentProgress = 0;
 
     // Clear any existing intervals
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-    if (stageIntervalRef.current) clearInterval(stageIntervalRef.current);
-
-    // Function to update progress smoothly within a stage
-    const updateProgress = () => {
-      const targetProgressForStage = (currentStageIndex + 1) * progressPerStage;
-      const increment = progressPerStage / (3000 / 100); // Simulate progress over 3 seconds per stage
-
-      progressIntervalRef.current = setInterval(() => {
-        currentProgress += increment;
-        if (currentProgress >= targetProgressForStage) {
-          currentProgress = targetProgressForStage; // Cap at stage target
-          setUploadProgress(Math.min(95, currentProgress));
-          if (progressIntervalRef.current) clearInterval(progressIntervalRef.current); // Stop incrementing for this stage
-        } else {
-          setUploadProgress(Math.min(95, currentProgress));
-        }
-      }, 100); // Update progress frequently for smoothness
-    };
-
-    // Function to advance to the next stage
-    const advanceStage = () => {
-      if (currentStageIndex < totalStages) {
-        setProcessingStage(stages[currentStageIndex]);
-        updateProgress(); // Start progress animation for the new stage
-        currentStageIndex++;
-      } else {
-         if (stageIntervalRef.current) clearInterval(stageIntervalRef.current); // Stop cycling stages
-      }
-    };
-
-    // Start the process
-    advanceStage(); // Show the first stage immediately
-    stageIntervalRef.current = setInterval(advanceStage, 3000); // Advance stage every 3 seconds
+    if (statusPollingRef.current) clearInterval(statusPollingRef.current);
 
     try {
-      console.log("Attempting to connect to server...");
+      console.log("Attempting to upload file...");
   
-      const response = await fetch(`${server}/file/uploadfileandclean`, {
+      // Step 1: Upload file and get task ID
+      const uploadResponse = await fetch(`${server}/file/uploadfileandclean/`, {
         method: "POST",
         body: formData,
-        // Explicitly set mode to cors
         mode: 'cors',
-        // Add these headers for better debugging
         headers: {
           'Accept': 'application/json',
         }
       });
       
-      console.log("Response received:", response.status);
+      console.log("Upload response received:", uploadResponse.status);
   
-      // Parse response early to detect errors in the JSON response
-      const data = await response.json();
-      
-      // Check if the response is successful
-      if (!response.ok) {
-        throw new Error(data.detail || "Upload failed");
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.detail || "Upload failed");
       }
-  
-      // Server processed successfully
 
-      // Clear intervals immediately
-      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-      if (stageIntervalRef.current) clearInterval(stageIntervalRef.current);
-      progressIntervalRef.current = null;
-      stageIntervalRef.current = null;
+      const uploadData = await uploadResponse.json();
+      console.log("Upload response data:", uploadData);
 
-      // Jump progress to 100% and show completion message
-      setProcessingStage("Processing complete!");
-      setUploadProgress(100);
+      // Extract task ID from response
+      if (!uploadData.task_id) {
+        console.error("No task_id in response:", uploadData);
+        throw new Error("No task ID received from server");
+      }
 
-      // Wait a moment for the user to see the 100% completion
-      await new Promise(resolve => setTimeout(resolve, 1200));
+      console.log("Task ID received:", uploadData.task_id);
+      setTaskId(uploadData.task_id);
+      setUploadStatus(uploadData.status);
+      setProcessingStage("File uploaded, processing started...");
+      setUploadProgress(10); // Initial progress after upload
 
+      // Step 2: Start polling for status updates
+      // Poll immediately first
+      console.log("Starting immediate status poll...");
+      await pollStatus(uploadData.task_id);
+      
+      // Then set up polling interval (every 2 seconds)
+      console.log("Setting up polling interval...");
+      statusPollingRef.current = setInterval(async () => {
+        console.log("Polling interval triggered...");
+        await pollStatus(uploadData.task_id);
+      }, 2000);
+
+      // Set a timeout to stop polling after 5 minutes (300 seconds)
+      setTimeout(() => {
+        if (statusPollingRef.current) {
+          clearInterval(statusPollingRef.current);
+          statusPollingRef.current = null;
+          
+          if (isUploading) {
       toast({
-        title: "Success",
-        description: "Statement uploaded and processed successfully",
-      });
-      
-      // Verify we have data before redirecting
-      if (data && data.dataframe) {
-        // Store the data in context/state if needed
-        // Example: setStatementData(data);
-        
-        // Close the dialog and redirect to insights page
-        localStorage.setItem('statementClientName', data.client_name);
-localStorage.setItem('statementMobileNumber', data.mobile_number);
-localStorage.setItem('statementData', JSON.stringify(data.dataframe));
-        setIsVerificationOpen(false);
-        router.push("/insights");
-      } else {
-        throw new Error("Received invalid data format from server");
-      }
+              variant: "destructive",
+              title: "Processing timeout",
+              description: "Processing is taking longer than expected. Please try again.",
+            });
+            setIsUploading(false);
+            setUploadProgress(0);
+            setProcessingStage("");
+          }
+        }
+      }, 300000); // 5 minutes timeout
   
     } catch (error) {
+      console.error("Upload error:", error);
+      
       // Clear intervals on error
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-      if (stageIntervalRef.current) clearInterval(stageIntervalRef.current);
+      if (statusPollingRef.current) clearInterval(statusPollingRef.current);
       progressIntervalRef.current = null;
-      stageIntervalRef.current = null;
+      statusPollingRef.current = null;
 
       toast({
         variant: "destructive",
@@ -216,6 +296,8 @@ localStorage.setItem('statementData', JSON.stringify(data.dataframe));
       setIsUploading(false);
       setUploadProgress(0);
       setProcessingStage("");
+      setTaskId("");
+      setUploadStatus("");
     }
   };
   // Removed formatFileSize function (moved to lib/utils)
