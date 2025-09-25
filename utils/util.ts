@@ -15,7 +15,7 @@ import {
   } from "lucide-react";
   
 
-  export const server = 'http://0.0.0.0:8000';
+  export const server = 'http://164.68.115.204:8000';
   
   export const mainMenuItems = [
     { name: "Home", icon: HomeIcon, href: "/", color: "text-blue-500" },
