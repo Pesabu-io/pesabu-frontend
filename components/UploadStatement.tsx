@@ -29,8 +29,8 @@ const UploadStatement = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [processingStage, setProcessingStage] = useState<string>("");
-  const [ setTaskId] = useState<string>("");
-  const [setUploadStatus] = useState<string>("");
+  const [taskId, setTaskId] = useState<string>("");
+  const [uploadStatus, setUploadStatus] = useState<string>("");
   const { toast } = useToast();
   const router = useRouter();
   const statusPollingRef = useRef<NodeJS.Timeout | null>(null);
