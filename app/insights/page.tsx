@@ -14,10 +14,7 @@ import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { AnimatePresence, motion } from "framer-motion";
 import { 
   CreditCard, 
-  FileText, 
-  User, 
-  Calendar, 
-  Download, 
+  FileText,  
   Building, 
   Activity, 
   Coffee, 
@@ -257,7 +254,7 @@ const Index = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {metrics.map((metric, index) => (
                           <motion.div
-                            key={metric.title}
+                            key={index}
                             variants={itemVariants}
                           >
                             <MetricCard

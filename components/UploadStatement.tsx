@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react"; // Added React impor
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, FileText, Lock, Shield, Loader2 } from "lucide-react"; // Removed Upload
+import { Shield } from "lucide-react"; // Removed Upload
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import UploadArea, { FileState } from "./upload/UploadArea";
@@ -14,16 +14,9 @@ import InfoCards from "./upload/InfoCards"; // Import the new info cards compone
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  
 } from "@/components/ui/dialog";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+
 import { motion } from "framer-motion";
 import { server } from "@/utils/util";
 // Removed FileState type definition
@@ -36,8 +29,8 @@ const UploadStatement = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [processingStage, setProcessingStage] = useState<string>("");
-  const [taskId, setTaskId] = useState<string>("");
-  const [uploadStatus, setUploadStatus] = useState<string>("");
+  const [ setTaskId] = useState<string>("");
+  const [setUploadStatus] = useState<string>("");
   const { toast } = useToast();
   const router = useRouter();
   const statusPollingRef = useRef<NodeJS.Timeout | null>(null);

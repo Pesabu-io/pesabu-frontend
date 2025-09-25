@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Upload, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';

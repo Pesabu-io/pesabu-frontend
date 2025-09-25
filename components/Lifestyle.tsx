@@ -92,7 +92,7 @@ const LifestyleDashboard = () => {
     const savingAvg = parseFloat(savingStats?.data?.average_transactions_per_month?.toString() || "0");
     const shoppingAvg = parseFloat(shoppingStats?.data?.average_transactions_per_month?.toString() || "0");
     
-    return months.map((month, index) => {
+    return months.map((month) => {
       // Create some random variation around the averages for visual interest
       const randomFactor = 0.7 + Math.random() * 0.6; // between 0.7 and 1.3
       
@@ -357,7 +357,7 @@ const LifestyleDashboard = () => {
               Betting Insights
             </AlertTitle>
             <AlertDescription>
-              You're spending approximately KES {parseFloat(bettingStats.data?.average_transacted_amount?.toString() || "0").toLocaleString()} per betting transaction, 
+              You&apos;re spending approximately KES {parseFloat(bettingStats.data?.average_transacted_amount?.toString() || "0").toLocaleString()} per betting transaction, 
               with {parseFloat(bettingStats.data?.average_transactions_per_month?.toString() || "0").toFixed(1)} transactions per month on average.
               {parseFloat(bettingStats.data?.total_tranasacted_amount?.toString() || "0") > 10000 ? 
                 " Consider setting a monthly budget for betting activities." : ""}
@@ -431,7 +431,7 @@ const LifestyleDashboard = () => {
               Savings Insights
             </AlertTitle>
             <AlertDescription>
-              Great job saving! You've accumulated KES {parseFloat(savingStats.data?.total_tranasacted_amount?.toString() || "0").toLocaleString()} 
+              Great job saving! You&apos;ve accumulated KES {parseFloat(savingStats.data?.total_tranasacted_amount?.toString() || "0").toLocaleString()} 
               across {savingStats.data?.total_transactions} transactions. Your largest single savings contribution was 
               KES {parseFloat(savingStats.data?.highest_transacted_amount?.toString() || "0").toLocaleString()}.
             </AlertDescription>
