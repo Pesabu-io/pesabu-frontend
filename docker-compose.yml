@@ -11,7 +11,10 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      # Point to external backend URL (adjust as needed for your deployment)
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      # For server-side requests, use external URL when running separately
+      - INTERNAL_API_URL=http://localhost:8000
     networks:
       - pesabu-network
     restart: unless-stopped
@@ -25,6 +28,7 @@ services:
 networks:
   pesabu-network:
     driver: bridge
+    external: true  # Use existing network if backend is already running
 
 volumes:
-  pesabu_data:
+  pesabu_frontend_data:
