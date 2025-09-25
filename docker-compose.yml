@@ -24,47 +24,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # Backend Service (FastAPI)
-  backend:
-    container_name: pesabu-backend
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    environment:
-      - PYTHONPATH=/app
-      - PYTHONUNBUFFERED=1
-      - ENVIRONMENT=production
-    volumes:
-      - ./backend:/app
-      - /app/__pycache__
-    networks:
-      - pesabu-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
-  # Nginx Reverse Proxy (Optional)
-  nginx:
-    container_name: pesabu-nginx
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - pesabu-network
-    restart: unless-stopped
 
 networks:
   pesabu-network:
