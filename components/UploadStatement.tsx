@@ -181,15 +181,15 @@ const UploadStatement = () => {
 
     // Add null check for selectedFile to satisfy TypeScript
     if (!selectedFile) {
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "No file selected. Please select a file again.",
-        });
-        setIsVerificationOpen(false); // Close the dialog if no file somehow
-        return;
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No file selected. Please select a file again.",
+      });
+      setIsVerificationOpen(false); // Close the dialog if no file somehow
+      return;
     }
-  
+
     setIsUploading(true);
     setUploadProgress(0);
     setProcessingStage("Uploading file...");
@@ -279,7 +279,7 @@ const UploadStatement = () => {
         title: "Upload failed",
         description: error instanceof Error ? error.message : "An unknown error occurred",
       });
-      
+
       // Reset the loading state but keep the dialog open for retry
       setIsUploading(false);
       setUploadProgress(0);
@@ -296,7 +296,7 @@ const UploadStatement = () => {
       <div className="flex-1 overflow-auto">
         <Header />
         <main className="p-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -309,7 +309,7 @@ const UploadStatement = () => {
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
               {/* Gradient top banner */}
               <div className="bg-gradient-to-r from-pesabu-teal to-pesabu-teal/80 h-4"></div>
-              
+
               <div className="p-8 md:p-10">
                 {/* Use UploadArea component */}
                 <UploadArea
@@ -343,27 +343,27 @@ const UploadStatement = () => {
 
             {/* Use InfoCards component */}
             <InfoCards />
-            
+
           </motion.div>
         </main>
       </div>
 
-    {/* Verification Dialog */}
-    <Dialog open={isVerificationOpen} onOpenChange={setIsVerificationOpen}>
-      <DialogContent className="sm:max-w-md bg-white rounded-2xl">
-        {/* Use VerificationDialogContent component */}
-        <VerificationDialogContent
-          isUploading={isUploading}
-          uploadProgress={uploadProgress}
-          processingStage={processingStage}
-          verificationCode={verificationCode}
-          setVerificationCode={setVerificationCode}
-          handleVerification={handleVerification}
-        />
-      </DialogContent>
-    </Dialog>
+      {/* Verification Dialog */}
+      <Dialog open={isVerificationOpen} onOpenChange={setIsVerificationOpen}>
+        <DialogContent className="sm:max-w-md bg-white rounded-2xl">
+          {/* Use VerificationDialogContent component */}
+          <VerificationDialogContent
+            isUploading={isUploading}
+            uploadProgress={uploadProgress}
+            processingStage={processingStage}
+            verificationCode={verificationCode}
+            setVerificationCode={setVerificationCode}
+            handleVerification={handleVerification}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
-);
+  );
 };
 
 export default UploadStatement;

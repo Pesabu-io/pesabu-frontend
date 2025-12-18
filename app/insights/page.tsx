@@ -29,7 +29,7 @@ const Index = () => {
   const [number, setNumber] = useState();
 
   const { insights } = useTransactionData();
-  const { data } = useFinancialInstitutionsData();
+  const { data, insights: financialInsights } = useFinancialInstitutionsData();
   
   const handleDownload = () => {
     console.log("Downloading document...");
@@ -44,7 +44,8 @@ const Index = () => {
   const creditScore = data?.creditScore?.credit_score_status;
   const creditScore1 = data?.creditScore?.credit_score;
 
-  const uniqueBanksCount = insights?.uniqueBanksCount || 0;
+  // Get unique banks count from financial institutions data
+  const uniqueBanksCount = financialInsights?.uniqueBanksCount || data?.clientBanks?.length || 0;
 
   const metrics = [
     { 
