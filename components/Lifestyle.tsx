@@ -59,24 +59,89 @@ const Lifestyle = () => {
       setIsLoading(true);
       setError(null);
 
-      const [bettingResponse, savingsResponse, shoppingResponse] = await Promise.all([
-        fetch(`${server}/lifestyle_module/betting_summary_stats/`),
-        fetch(`${server}/lifestyle_module/saving_summary_stats/`),
-        fetch(`${server}/lifestyle_module/shopping_summary_stats/`)
-      ]);
+      // Helper function to fetch with retry and timeout
+      const fetchWithRetry = async (endpoint: string, retries = 3): Promise<Response | null> => {
+        for (let i = 0; i < retries; i++) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+            
+            const response = await fetch(`${server}/lifestyle_module/${endpoint}`, {
+              signal: controller.signal,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              keepalive: true,
+            });
+            
+            clearTimeout(timeoutId);
+            return response;
+          } catch (error: any) {
+            // Handle specific error types
+            const isNetworkError = error?.name === 'TypeError' || 
+                                 error?.message?.includes('network') ||
+                                 error?.message?.includes('ERR_NETWORK') ||
+                                 error?.name === 'AbortError';
+            
+            if (isNetworkError && i < retries - 1) {
+              console.warn(`⚠️ Network error for ${endpoint}, retrying... (attempt ${i + 1}/${retries})`);
+              // Longer delay for network errors
+              await new Promise(resolve => setTimeout(resolve, 2000 * (i + 1)));
+              continue;
+            }
+            
+            if (i === retries - 1) {
+              console.error(`❌ Failed to fetch ${endpoint} after ${retries} attempts:`, error?.message || error);
+              return null;
+            }
+            
+            // Wait before retrying (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+          }
+        }
+        return null;
+      };
 
-      const [bettingData, savingsData, shoppingData] = await Promise.all([
-        bettingResponse.json(),
-        savingsResponse.json(),
-        shoppingResponse.json()
-      ]);
+      // Fetch endpoints sequentially to avoid overwhelming the server
+      const endpoints = ['betting_summary_stats/', 'saving_summary_stats/', 'shopping_summary_stats/'];
+      const results: any[] = [];
+
+      for (const endpoint of endpoints) {
+        console.log(`⏳ Fetching lifestyle endpoint: ${endpoint}`);
+        const response = await fetchWithRetry(endpoint);
+        
+        if (response) {
+          try {
+            if (!response.ok) {
+              const errorText = await response.text();
+              console.error(`❌ Endpoint ${endpoint} failed with status ${response.status}:`, errorText);
+              results.push(null);
+            } else {
+              const data = await response.json();
+              console.log(`✅ Lifestyle endpoint ${endpoint} succeeded`);
+              results.push(data);
+            }
+          } catch (error: any) {
+            console.error(`❌ Error parsing JSON from ${endpoint}:`, error?.message || error);
+            results.push(null);
+          }
+        } else {
+          results.push(null);
+        }
+        
+        // Small delay between requests
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      const [bettingData, savingsData, shoppingData] = results;
 
       setData({
-        betting: bettingData.message ? undefined : bettingData,
-        savings: savingsData.message ? undefined : savingsData,
-        shopping: shoppingData.message ? undefined : shoppingData
+        betting: bettingData && !bettingData.message ? bettingData : undefined,
+        savings: savingsData && !savingsData.message ? savingsData : undefined,
+        shopping: shoppingData && !shoppingData.message ? shoppingData : undefined
       });
     } catch (err) {
+      console.error('Error fetching lifestyle data:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch lifestyle data');
     } finally {
       setIsLoading(false);

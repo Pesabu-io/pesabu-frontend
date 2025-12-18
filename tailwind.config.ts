@@ -19,8 +19,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Poppins', 'sans-serif'],
-				miniver: ['Miniver', 'serif'],
+				sans: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
+				mono: ['var(--font-geist-mono)', 'monospace'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

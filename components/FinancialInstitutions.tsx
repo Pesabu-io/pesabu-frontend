@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -53,6 +53,10 @@ interface FinancialInstitutionsData {
     highest_amount_bank: string;
     lowest_amount_bank: string;
   };
+  lowestAmountReceivedThroughBank?: {
+    lowest_received_amount: number;
+  };
+  lowestAmountSentThroughBank?: number;
   topFiveReceivedCount?: {
     top_five_banks: Array<{
       bank: string;
@@ -64,6 +68,9 @@ interface FinancialInstitutionsData {
       bank: string;
       count: number;
     }>;
+  };
+  safaricomFinancialServices?: {
+    transactions: any[];
   };
   mshwariTransactions?: {
     mshwari_transactions: any[];
@@ -102,11 +109,7 @@ const FinancialInstitutions = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchFinancialInstitutionsData();
-  }, []);
-
-  const fetchFinancialInstitutionsData = async () => {
+  const fetchFinancialInstitutionsData = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -115,20 +118,117 @@ const FinancialInstitutions = () => {
         'client_banks/',
         'bank_received_summary_metrics/',
         'bank_sent_summary_metrics/',
+        'lowest_amount_received_through_bank/',
+        'lowest_amount_sent_through_bank/',
         'top_five_received_count/',
         'top_five_sent_count/',
+        'identify_safaricom_financial_services/',
         'identify_mshwari_financial_transactions/',
         'mshwari_loan_summary/',
         'fuliza_usage/',
         'fuliza_loan_summary/'
       ];
 
-      const responses = await Promise.all(
-        endpoints.map(endpoint => fetch(`${server}/financial_institutions_module/${endpoint}`))
-      );
+      const slowEndpoints = [
+        'fuliza_usage/',
+        'fuliza_loan_summary/',
+        'identify_mshwari_financial_transactions/',
+        'mshwari_loan_summary/',
+        'identify_safaricom_financial_services/'
+      ];
 
+      // Helper function to fetch with retry and timeout
+      const fetchWithRetry = async (endpoint: string, retries = 3): Promise<Response | null> => {
+        for (let i = 0; i < retries; i++) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+            
+            const response = await fetch(`${server}/financial_institutions_module/${endpoint}`, {
+              signal: controller.signal,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              keepalive: true,
+            });
+            
+            clearTimeout(timeoutId);
+            return response;
+          } catch (error: any) {
+            // Handle specific error types
+            const isNetworkError = error?.name === 'TypeError' || 
+                                 error?.message?.includes('network') ||
+                                 error?.message?.includes('ERR_NETWORK') ||
+                                 error?.name === 'AbortError';
+            
+            if (isNetworkError && i < retries - 1) {
+              console.warn(`⚠️ Network error for ${endpoint}, retrying... (attempt ${i + 1}/${retries})`);
+              // Longer delay for network errors
+              await new Promise(resolve => setTimeout(resolve, 2000 * (i + 1)));
+              continue;
+            }
+            
+            if (i === retries - 1) {
+              console.error(`❌ Failed to fetch ${endpoint} after ${retries} attempts:`, error?.message || error);
+              return null;
+            }
+            
+            // Wait before retrying (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+          }
+        }
+        return null;
+      };
+
+      const responses: (Response | null)[] = [];
+      const batchSize = 3; // Process 3 endpoints at a time
+
+      for (let i = 0; i < endpoints.length; i += batchSize) {
+        const batch = endpoints.slice(i, i + batchSize);
+        console.log(`📦 Fetching batch ${Math.floor(i / batchSize) + 1} for Financial Institutions: ${batch.join(', ')}`);
+
+        const batchResponses = await Promise.all(
+          batch.map(endpoint => {
+            if (slowEndpoints.includes(endpoint)) {
+              // Process slow endpoints sequentially
+              return (async () => {
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+                return fetchWithRetry(endpoint);
+              })();
+            }
+            return fetchWithRetry(endpoint);
+          })
+        );
+        responses.push(...batchResponses);
+
+        if (i + batchSize < endpoints.length) {
+          await new Promise(resolve => setTimeout(resolve, 300)); // Delay between batches
+        }
+      }
+
+      // Parse responses with error handling
       const results = await Promise.all(
-        responses.map(response => response.json())
+        responses.map(async (res, index) => {
+          if (!res) {
+            console.error(`❌ Endpoint ${endpoints[index]} - No response received`);
+            return null;
+          }
+
+          try {
+            if (!res.ok) {
+              const errorText = await res.text();
+              console.error(`❌ Endpoint ${endpoints[index]} failed with status ${res.status}:`, errorText);
+              return null;
+            }
+            
+            const data = await res.json();
+            console.log(`✅ Financial Institutions endpoint ${endpoints[index]} succeeded`);
+            return data;
+          } catch (error: any) {
+            console.error(`❌ Error parsing JSON from ${endpoints[index]}:`, error?.message || error);
+            return null;
+          }
+        })
       );
 
       const financialData: FinancialInstitutionsData = {};
@@ -136,8 +236,12 @@ const FinancialInstitutions = () => {
       endpoints.forEach((endpoint, index) => {
         const result = results[index];
         
-        if (!result.message && !result.error) {
-          switch (endpoint) {
+        // Skip null results (failed requests)
+        if (!result || result.message || result.error) {
+          return;
+        }
+        
+        switch (endpoint) {
             case 'client_banks/':
               financialData.clientBanks = {
                 banks: result[0] || [],
@@ -151,11 +255,20 @@ const FinancialInstitutions = () => {
             case 'bank_sent_summary_metrics/':
               financialData.bankSentSummary = result;
               break;
+            case 'lowest_amount_received_through_bank/':
+              financialData.lowestAmountReceivedThroughBank = result;
+              break;
+            case 'lowest_amount_sent_through_bank/':
+              financialData.lowestAmountSentThroughBank = result;
+              break;
             case 'top_five_received_count/':
               financialData.topFiveReceivedCount = result;
               break;
             case 'top_five_sent_count/':
               financialData.topFiveSentCount = result;
+              break;
+            case 'identify_safaricom_financial_services/':
+              financialData.safaricomFinancialServices = result;
               break;
             case 'identify_mshwari_financial_transactions/':
               financialData.mshwariTransactions = result;
@@ -169,7 +282,6 @@ const FinancialInstitutions = () => {
             case 'fuliza_loan_summary/':
               financialData.fulizaLoanSummary = result;
               break;
-          }
         }
       });
 
@@ -179,7 +291,11 @@ const FinancialInstitutions = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchFinancialInstitutionsData();
+  }, [fetchFinancialInstitutionsData]);
 
   if (isLoading) {
     return (

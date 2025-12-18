@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -13,7 +13,9 @@ import {
   Calendar,
   Clock,
   BarChart4,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
+  ArrowUp,
+  ArrowDown
 } from "lucide-react";
 import { SummaryCard } from './SummaryCard';
 import { TransactionDistribution } from './TransactionDistribution';
@@ -22,38 +24,127 @@ import { useTransactionData } from '@/hooks/useTransactionData';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar, ResponsiveContainer } from 'recharts';
 
+type SortField = 'names' | 'numbers' | 'transactions' | 'amount' | 'max_amount';
+type SortDirection = 'asc' | 'desc';
+
 const TransactionDashboard = () => {
-  const { transTypes, summary, insights } = useTransactionData();
+  const { transTypes, summary, insights, detailedTransactions } = useTransactionData();
   const [timeRange, setTimeRange] = useState("30");
   const [chartView, setChartView] = useState("volume");
+  const [activeDetailTab, setActiveDetailTab] = useState("paybill");
+  const [sortField, setSortField] = useState<SortField>('transactions');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-  // Mock time series data for demonstration
-  const mockTimeSeriesData = [
-    { date: '03/01', deposits: 1200, withdrawals: 900, net: 300 },
-    { date: '03/02', deposits: 1400, withdrawals: 1100, net: 300 },
-    { date: '03/03', deposits: 1300, withdrawals: 950, net: 350 },
-    { date: '03/04', deposits: 1500, withdrawals: 1200, net: 300 },
-    { date: '03/05', deposits: 1700, withdrawals: 1400, net: 300 },
-    { date: '03/06', deposits: 1600, withdrawals: 1300, net: 300 },
-    { date: '03/07', deposits: 1800, withdrawals: 1600, net: 200 },
-  ];
+  // Prepare hourly data from endpoint
+  const hourlyChartData = detailedTransactions?.hourlyData?.map((item) => ({
+    hour: item.time_day,
+    transactions: item['Receipt No.'],
+    amount: item.amount
+  })) || [];
 
-  // Mock transaction size distribution for demonstration
-  const transactionSizeBuckets = [
-    { name: '0-1K', deposits: 142, withdrawals: 98 },
-    { name: '1K-5K', deposits: 205, withdrawals: 178 },
-    { name: '5K-10K', deposits: 125, withdrawals: 104 },
-    { name: '10K-50K', deposits: 87, withdrawals: 95 },
-    { name: '50K+', deposits: 23, withdrawals: 15 },
-  ];
+  // Prepare daily data from endpoint
+  const dailyChartData = detailedTransactions?.dailyData?.map((item) => ({
+    day: item.day_name,
+    transactions: item['Receipt No.'],
+    amount: item.amount
+  })) || [];
 
-  // Mock time distribution data
-  const timeDistribution = [
-    { name: 'Morning (6-12)', transactions: 285, value: 1250000 },
-    { name: 'Afternoon (12-17)', transactions: 376, value: 1580000 },
-    { name: 'Evening (17-22)', transactions: 423, value: 1920000 },
-    { name: 'Night (22-6)', transactions: 198, value: 750000 },
-  ];
+  // Sorting function
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  const sortData = <T extends Record<string, any>>(data: T[], field: SortField): T[] => {
+    if (!data || data.length === 0) return data;
+    
+    const sorted = [...data].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (field) {
+        case 'names':
+          aValue = (a.names || '').toLowerCase();
+          bValue = (b.names || '').toLowerCase();
+          break;
+        case 'numbers':
+          aValue = a.numbers || '';
+          bValue = b.numbers || '';
+          break;
+        case 'transactions':
+          aValue = a.receipt_count || a['Receipt No.'] || 0;
+          bValue = b.receipt_count || b['Receipt No.'] || 0;
+          break;
+        case 'amount':
+          aValue = a.amount || a.max_amount || 0;
+          bValue = b.amount || b.max_amount || 0;
+          break;
+        case 'max_amount':
+          aValue = a.max_amount || a.amount || 0;
+          bValue = b.max_amount || b.amount || 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return sortDirection === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === 'asc'
+          ? (aValue as number) - (bValue as number)
+          : (bValue as number) - (aValue as number);
+      }
+    });
+
+    return sorted;
+  };
+
+  // Sort icon component
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-3 w-3 ml-1 opacity-50" />;
+    }
+    return sortDirection === 'asc' 
+      ? <ArrowUp className="h-3 w-3 ml-1" />
+      : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
+
+  // Sorted data for each tab
+  const sortedPaybill = useMemo(() => 
+    sortData(detailedTransactions?.topPaybill || [], sortField),
+    [detailedTransactions?.topPaybill, sortField, sortDirection]
+  );
+  
+  const sortedTill = useMemo(() => 
+    sortData(detailedTransactions?.topTill || [], sortField),
+    [detailedTransactions?.topTill, sortField, sortDirection]
+  );
+  
+  const sortedSendMoney = useMemo(() => 
+    sortData(detailedTransactions?.topSendMoney || [], sortField),
+    [detailedTransactions?.topSendMoney, sortField, sortDirection]
+  );
+  
+  const sortedCustomer = useMemo(() => 
+    sortData(detailedTransactions?.topCustomer || [], sortField),
+    [detailedTransactions?.topCustomer, sortField, sortDirection]
+  );
+  
+  const sortedWithdrawals = useMemo(() => 
+    sortData(detailedTransactions?.topWithdrawals || [], sortField),
+    [detailedTransactions?.topWithdrawals, sortField, sortDirection]
+  );
+  
+  const sortedReceived = useMemo(() => 
+    sortData(detailedTransactions?.topReceived || [], sortField),
+    [detailedTransactions?.topReceived, sortField, sortDirection]
+  );
 
   if (transTypes.isLoading || summary.isLoading) {
     return (
@@ -85,19 +176,19 @@ const TransactionDashboard = () => {
     {
       title: "Net Cash Flow",
       value: `KES ${insights?.netFlow.toLocaleString() || '0'}`,
-      change: insights?.netFlow > 0 ? 
-        `+${((insights.netFlow / insights.totalTransactions) * 100).toFixed(1)}% positive` : 
-        `${((insights.netFlow / insights.totalTransactions) * 100).toFixed(1)}% negative`,
-      icon: insights?.netFlow > 0 ? 
+      change: (insights?.netFlow ?? 0) > 0 ? 
+        `+${(((insights?.netFlow ?? 0) / ((insights?.totalTransactions ?? 1) || 1)) * 100).toFixed(1)}% positive` : 
+        `${(((insights?.netFlow ?? 0) / ((insights?.totalTransactions ?? 1) || 1)) * 100).toFixed(1)}% negative`,
+      icon: (insights?.netFlow ?? 0) > 0 ? 
         <TrendingUp className="h-4 w-4 text-emerald-500" /> : 
         <TrendingDown className="h-4 w-4 text-red-500" />,
-      bgColor: insights?.netFlow > 0 ? "bg-emerald-50" : "bg-red-50",
-      textColor: insights?.netFlow > 0 ? "text-emerald-600" : "text-red-600",
+      bgColor: (insights?.netFlow ?? 0) > 0 ? "bg-emerald-50" : "bg-red-50",
+      textColor: (insights?.netFlow ?? 0) > 0 ? "text-emerald-600" : "text-red-600",
     },
     {
       title: "Average Transaction Size",
-      value: `KES ${insights?.avgTransactionSize.toLocaleString()}`,
-      change: `${insights?.avgTransactionSize > 5000 ? 'Above' : 'Below'} market avg`,
+      value: `KES ${insights?.avgTransactionSize.toLocaleString() || '0'}`,
+      change: `${(insights?.avgTransactionSize ?? 0) > 5000 ? 'Above' : 'Below'} market avg`,
       icon: <ArrowUpDown className="h-4 w-4 text-blue-500" />,
       bgColor: "bg-blue-50",
       textColor: "text-blue-600",
@@ -105,18 +196,18 @@ const TransactionDashboard = () => {
     {
       title: "Transaction Volume",
       value: insights?.totalTransactions || 0,
-      change: `${((insights?.totalTransactions / 30) || 0).toFixed(1)}/day`,
+      change: `${(((insights?.totalTransactions ?? 0) / 30) || 0).toFixed(1)}/day`,
       icon: <Repeat className="h-4 w-4 text-purple-500" />,
       bgColor: "bg-purple-50",
       textColor: "text-purple-600",
     },
     {
-      title: "Retention Rate",
-      value: `${insights?.retentionRate.toFixed(1)}%`,
-      change: insights?.retentionRate > 85 ? "Healthy" : "Needs attention",
-      icon: <Percent className="h-4 w-4 text-orange-500" />,
+      title: "Amount Range",
+      value: `KES ${summary.data?.minimum_amount_transacted.toLocaleString() || '0'}`,
+      change: `Max: KES ${summary.data?.maximum_amount_transacted.toLocaleString() || '0'}`,
+      icon: <DollarSign className="h-4 w-4 text-orange-500" />,
       bgColor: "bg-orange-50",
-      textColor: insights?.retentionRate > 85 ? "text-green-600" : "text-orange-600",
+      textColor: "text-orange-600",
     },
   ];
 
@@ -176,33 +267,30 @@ const TransactionDashboard = () => {
                 </button>
               </div>
             </div>
-            <CardDescription>Daily transaction patterns for the last week</CardDescription>
+            <CardDescription>Transaction patterns by day of week</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 {chartView === 'volume' ? (
-                  <LineChart data={mockTimeSeriesData}
+                  <BarChart data={dailyChartData}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
+                    <XAxis dataKey="day" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="deposits" stroke="#16a34a" activeDot={{ r: 8 }} />
-                    <Line type="monotone" dataKey="withdrawals" stroke="#dc2626" />
-                    <Line type="monotone" dataKey="net" stroke="#3b82f6" strokeDasharray="5 5" />
-                  </LineChart>
+                    <Bar dataKey="transactions" name="Transactions" fill="#3b82f6" />
+                  </BarChart>
                 ) : (
-                  <BarChart data={transactionSizeBuckets}
+                  <BarChart data={dailyChartData}
                     margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="day" />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip formatter={(value) => `KES ${value?.toLocaleString()}`} />
                     <Legend />
-                    <Bar dataKey="deposits" name="Deposits" fill="#16a34a" />
-                    <Bar dataKey="withdrawals" name="Withdrawals" fill="#dc2626" />
+                    <Bar dataKey="amount" name="Amount" fill="#16a34a" />
                   </BarChart>
                 )}
               </ResponsiveContainer>
@@ -246,12 +334,12 @@ const TransactionDashboard = () => {
                     <div className="h-2 bg-gray-200 rounded-full">
                       <div 
                         className="h-2 bg-green-500 rounded-l-full" 
-                        style={{ width: `${(summary.data?.total_received / (summary.data?.total_received + summary.data?.total_withdrawn) * 100)}%` }}
+                        style={{ width: `${((summary.data?.total_received ?? 0) / ((summary.data?.total_received ?? 0) + (summary.data?.total_withdrawn ?? 0)) * 100) || 0}%` }}
                       />
                     </div>
                     <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-                      <span>{Math.round(summary.data?.total_received / (summary.data?.total_received + summary.data?.total_withdrawn) * 100)}% Deposits</span>
-                      <span>{Math.round(summary.data?.total_withdrawn / (summary.data?.total_received + summary.data?.total_withdrawn) * 100)}% Withdrawals</span>
+                      <span>{Math.round(((summary.data?.total_received ?? 0) / ((summary.data?.total_received ?? 0) + (summary.data?.total_withdrawn ?? 0)) * 100) || 0)}% Deposits</span>
+                      <span>{Math.round(((summary.data?.total_withdrawn ?? 0) / ((summary.data?.total_received ?? 0) + (summary.data?.total_withdrawn ?? 0)) * 100) || 0)}% Withdrawals</span>
                     </div>
                   </div>
                 </div>
@@ -271,27 +359,40 @@ const TransactionDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {timeDistribution.map((item) => (
-                <div key={item.name} className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium">{item.name}</span>
-                    <span className="text-sm text-muted-foreground">{item.transactions} transactions</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded-full">
-                    <div 
-                      className="h-2 bg-blue-500 rounded-full" 
-                      style={{ width: `${(item.transactions / timeDistribution.reduce((sum, i) => sum + i.transactions, 0) * 100)}%` }}
-                    />
-                  </div>
+              {hourlyChartData.length > 0 ? (
+                hourlyChartData.slice(0, 8).map((item) => {
+                  const total = hourlyChartData.reduce((sum, i) => sum + i.transactions, 0);
+                  return (
+                    <div key={item.hour} className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium">{item.hour}</span>
+                        <span className="text-sm text-muted-foreground">{item.transactions} transactions</span>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded-full">
+                        <div 
+                          className="h-2 bg-blue-500 rounded-full" 
+                          style={{ width: `${total > 0 ? (item.transactions / total * 100) : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-sm text-muted-foreground">No hourly data available</div>
+              )}
+            </div>
+            {hourlyChartData.length > 0 && (
+              <div className="mt-6 pt-4 border-t">
+                <div className="text-sm font-medium mb-2">
+                  Peak transaction time: {hourlyChartData.reduce((max, item) => 
+                    item.transactions > max.transactions ? item : max, hourlyChartData[0]
+                  )?.hour || 'N/A'}
                 </div>
-              ))}
-            </div>
-            <div className="mt-6 pt-4 border-t">
-              <div className="text-sm font-medium mb-2">Peak transaction time: 6:00 PM - 8:00 PM</div>
-              <div className="text-xs text-muted-foreground">
-                Consider optimizing system resources during peak hours to ensure smooth transaction processing
+                <div className="text-xs text-muted-foreground">
+                  Consider optimizing system resources during peak hours to ensure smooth transaction processing
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
         
@@ -310,7 +411,7 @@ const TransactionDashboard = () => {
                   <div className="text-sm font-medium">Busiest Day</div>
                   <div className="text-2xl font-bold">Wednesday</div>
                   <div className="text-xs text-muted-foreground">
-                    {Math.round(summary.data?.deposit_count * 0.22)} transactions processed
+                    {Math.round((summary.data?.deposit_count ?? 0) * 0.22)} transactions processed
                   </div>
                 </div>
               </div>
@@ -334,7 +435,7 @@ const TransactionDashboard = () => {
                 </div>
                 <div>
                   <div className="text-sm font-medium">Processing Efficiency</div>
-                  <div className="text-2xl font-bold">{Math.round(insights?.totalTransactions / 30 / 24 * 1.5)} / hour</div>
+                  <div className="text-2xl font-bold">{Math.round((insights?.totalTransactions ?? 0) / 30 / 24 * 1.5)} / hour</div>
                   <div className="text-xs text-muted-foreground">
                     Average transaction processing rate
                   </div>
@@ -345,66 +446,389 @@ const TransactionDashboard = () => {
         </Card>
       </div>
 
-      <Card className="lg:col-span-3">
+      {/* Top Transactions by Type */}
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Strategic Insights & Recommendations</CardTitle>
+          <CardTitle className="text-lg font-medium">Top Transactions by Type</CardTitle>
+          <CardDescription>Most frequent transaction partners and patterns</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-green-100 rounded-full">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
+          <Tabs value={activeDetailTab} onValueChange={setActiveDetailTab}>
+            <TabsList className="grid w-full grid-cols-6 mb-4">
+              <TabsTrigger value="paybill">Pay Bill</TabsTrigger>
+              <TabsTrigger value="till">Till No</TabsTrigger>
+              <TabsTrigger value="sendmoney">Send Money</TabsTrigger>
+              <TabsTrigger value="customer">Customer</TabsTrigger>
+              <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
+              <TabsTrigger value="received">Received</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="paybill">
+              {detailedTransactions?.topPaybill && detailedTransactions.topPaybill.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('names')}
+                        >
+                          <div className="flex items-center">
+                            Name
+                            <SortIcon field="names" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('numbers')}
+                        >
+                          <div className="flex items-center">
+                            Number
+                            <SortIcon field="numbers" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('transactions')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Transactions
+                            <SortIcon field="transactions" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('amount')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Max Amount
+                            <SortIcon field="amount" />
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedPaybill.map((item, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="p-2">{item.names || 'Unknown'}</td>
+                          <td className="p-2">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2">{item.receipt_count || item['Receipt No.'] || 0}</td>
+                          <td className="text-right p-2 font-semibold">KES {(item.max_amount || item.amount || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <h3 className="font-medium">Transaction Health</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {insights?.retentionRate > 85 
-                  ? "Strong retention rate of " + insights?.retentionRate.toFixed(1) + "% indicates excellent platform trust. Consider implementing loyalty rewards to maintain this momentum."
-                  : "Current retention rate of " + insights?.retentionRate.toFixed(1) + "% needs improvement. We recommend implementing trust-building measures and investigating withdrawal friction points."}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-purple-100 rounded-full">
-                  <PieChartIcon className="h-4 w-4 text-purple-600" />
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">No Pay Bill transaction data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="till">
+              {detailedTransactions?.topTill && detailedTransactions.topTill.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('names')}
+                        >
+                          <div className="flex items-center">
+                            Name
+                            <SortIcon field="names" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('numbers')}
+                        >
+                          <div className="flex items-center">
+                            Number
+                            <SortIcon field="numbers" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('transactions')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Transactions
+                            <SortIcon field="transactions" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('amount')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Total Amount
+                            <SortIcon field="amount" />
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedTill.map((item, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="p-2">{item.names || 'Unknown'}</td>
+                          <td className="p-2">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2">{item.receipt_count || item['Receipt No.'] || 0}</td>
+                          <td className="text-right p-2 font-semibold">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <h3 className="font-medium">Usage Patterns</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {`Daily transaction volume of ${(insights?.totalTransactions / 30).toFixed(1)} 
-                with deposit-to-withdrawal ratio of ${(insights?.depositFrequency / insights?.withdrawalFrequency).toFixed(1)} indicates 
-                ${Number(insights?.depositFrequency) > 55 ? 'strong platform growth' : 'stable platform usage'}. 
-                ${Number(insights?.depositFrequency) > 60 ? 'Consider introducing automatic savings features to capitalize on deposit behavior.' : 'Focus on increasing deposit frequency with targeted incentives.'}`}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-blue-100 rounded-full">
-                  <DollarSign className="h-4 w-4 text-blue-600" />
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">No Till No transaction data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="sendmoney">
+              {detailedTransactions?.topSendMoney && detailedTransactions.topSendMoney.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('names')}
+                        >
+                          <div className="flex items-center">
+                            Name
+                            <SortIcon field="names" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('numbers')}
+                        >
+                          <div className="flex items-center">
+                            Number
+                            <SortIcon field="numbers" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('transactions')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Transactions
+                            <SortIcon field="transactions" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('amount')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Total Amount
+                            <SortIcon field="amount" />
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedSendMoney.map((item, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="p-2">{item.names || 'Unknown'}</td>
+                          <td className="p-2">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2">{item.receipt_count || item['Receipt No.'] || 0}</td>
+                          <td className="text-right p-2 font-semibold">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <h3 className="font-medium">Value Optimization</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {summary?.data ? `Transaction sizes ranging from KES ${summary.data.lowest_deposit} to 
-                KES ${summary.data.top_deposit} present an opportunity to optimize for ${insights?.avgTransactionSize > 5000 ? 'high-value transactions' : 'transaction volume'}. 
-                ${insights?.avgTransactionSize > 5000 ? 'Focus on enhancing VIP services for your high-value customers.' : 'Consider implementing tiered transaction fees to encourage larger deposits.'}`
-                : "Transaction size data not available."}
-              </p>
-            </div>
-          </div>
-          <div className="mt-6 pt-4 border-t">
-            <div className="text-sm font-medium">Anomaly Detection</div>
-            <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-amber-600" />
-                <p className="text-sm text-amber-800">
-                  {`There ${insights?.withdrawalFrequency > 45 ? 'is' : 'are no'} unusual withdrawal pattern${insights?.withdrawalFrequency > 45 ? 's' : 's'} detected in the last ${timeRange} days.`}
-                  {insights?.withdrawalFrequency > 45 ? ' We recommend investigating the recent increase in withdrawal frequency.' : ' All transaction patterns are within normal parameters.'}
-                </p>
-              </div>
-            </div>
-          </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">No Send Money transaction data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="customer">
+              {detailedTransactions?.topCustomer && detailedTransactions.topCustomer.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('names')}
+                        >
+                          <div className="flex items-center">
+                            Name
+                            <SortIcon field="names" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('numbers')}
+                        >
+                          <div className="flex items-center">
+                            Number
+                            <SortIcon field="numbers" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('transactions')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Transactions
+                            <SortIcon field="transactions" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('amount')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Total Amount
+                            <SortIcon field="amount" />
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedCustomer.map((item, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="p-2">{item.names || 'Unknown'}</td>
+                          <td className="p-2">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2">{item['Receipt No.'] || item.receipt_count || 0}</td>
+                          <td className="text-right p-2 font-semibold text-green-600">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">No Customer Deposit transaction data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="withdrawals">
+              {detailedTransactions?.topWithdrawals && detailedTransactions.topWithdrawals.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('names')}
+                        >
+                          <div className="flex items-center">
+                            Name
+                            <SortIcon field="names" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('numbers')}
+                        >
+                          <div className="flex items-center">
+                            Number
+                            <SortIcon field="numbers" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('transactions')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Transactions
+                            <SortIcon field="transactions" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('amount')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Total Amount
+                            <SortIcon field="amount" />
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedWithdrawals.map((item, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="p-2">{item.names || 'Unknown'}</td>
+                          <td className="p-2">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2">{item['Receipt No.'] || item.receipt_count || 0}</td>
+                          <td className="text-right p-2 font-semibold text-red-600">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">No withdrawal transaction data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="received">
+              {detailedTransactions?.topReceived && detailedTransactions.topReceived.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('names')}
+                        >
+                          <div className="flex items-center">
+                            Name
+                            <SortIcon field="names" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('numbers')}
+                        >
+                          <div className="flex items-center">
+                            Number
+                            <SortIcon field="numbers" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('transactions')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Transactions
+                            <SortIcon field="transactions" />
+                          </div>
+                        </th>
+                        <th 
+                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          onClick={() => handleSort('amount')}
+                        >
+                          <div className="flex items-center justify-end">
+                            Total Amount
+                            <SortIcon field="amount" />
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedReceived.map((item, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="p-2">{item.names || 'Unknown'}</td>
+                          <td className="p-2">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2">{item['Receipt No.'] || item.receipt_count || 0}</td>
+                          <td className="text-right p-2 font-semibold text-green-600">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">No Received Money transaction data available</div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

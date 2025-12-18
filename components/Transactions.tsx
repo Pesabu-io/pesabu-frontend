@@ -49,8 +49,8 @@ interface TransactionData {
   lowestDeposit?: { lowest_amount_received: number };
   topWithdrawal?: { highest_withdrawn_amount: number };
   lowestWithdrawal?: { lowest_withdrawn_amount: number };
-  minAmountTransacted?: { lowest_deposit_amount: number };
-  maxAmountTransacted?: { highest_deposit_amount: number };
+  minAmountTransacted?: { lowest_amount_transacted: number };
+  maxAmountTransacted?: { highest_amount_transacted: number };
   topPaybillTransactions?: { data_final: any };
   topTillTransactions?: { data: any };
   topSendMoneyTransactions?: { data: any };
@@ -322,7 +322,7 @@ const Transactions = () => {
                 </p>
               </div>
               <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                {data.maxAmountTransacted?.highest_deposit_amount?.toLocaleString() || '0'} max
+                {data.maxAmountTransacted?.highest_amount_transacted?.toLocaleString() || '0'} max
               </Badge>
             </div>
           </CardContent>
@@ -338,14 +338,14 @@ const Transactions = () => {
                   <h3 className="font-medium">Amount Range</h3>
                 </div>
                 <p className="text-3xl font-bold mt-2">
-                  KES {data.minAmountTransacted?.lowest_deposit_amount?.toLocaleString() || '0'}
+                  KES {data.minAmountTransacted?.lowest_amount_transacted?.toLocaleString() || '0'}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Min transaction amount
                 </p>
               </div>
               <Badge variant="outline" className="bg-purple-50 text-purple-700">
-                Range: {data.maxAmountTransacted?.highest_deposit_amount?.toLocaleString() || '0'}
+                Range: {data.maxAmountTransacted?.highest_amount_transacted?.toLocaleString() || '0'}
               </Badge>
             </div>
           </CardContent>
@@ -484,6 +484,8 @@ const Transactions = () => {
               <TabsTrigger value="paybill">Pay Bill</TabsTrigger>
               <TabsTrigger value="till">Till No</TabsTrigger>
               <TabsTrigger value="sendmoney">Send Money</TabsTrigger>
+              <TabsTrigger value="customer">Customer Deposit</TabsTrigger>
+              <TabsTrigger value="received">Received Money</TabsTrigger>
               <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
             </TabsList>
 
@@ -513,29 +515,198 @@ const Transactions = () => {
               </div>
             </TabsContent>
 
-            {/* Other tabs would contain specific transaction data */}
+            {/* Pay Bill Transactions Tab */}
             <TabsContent value="paybill">
+              {data.topPaybillTransactions?.data_final ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {data.topPaybillTransactions.data_final.map((item: any, index: number) => (
+                      <div key={index} className="p-4 border rounded-lg">
+                        <p className="font-semibold">{item.names || 'Unknown'}</p>
+                        <p className="text-sm text-muted-foreground">{item.numbers}</p>
+                        <div className="mt-2 flex justify-between">
+                          <span className="text-sm">Transactions: {item.receipt_count}</span>
+                          <span className="font-bold">KES {item.max_amount?.toLocaleString() || '0'}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
               <div className="py-8 text-center text-muted-foreground">
-                Pay Bill transaction details would be displayed here
+                  No Pay Bill transaction data available
               </div>
+              )}
             </TabsContent>
 
+            {/* Till No Transactions Tab */}
             <TabsContent value="till">
+              {data.topTillTransactions?.data ? (
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Name</th>
+                          <th className="text-left p-2">Number</th>
+                          <th className="text-right p-2">Transactions</th>
+                          <th className="text-right p-2">Total Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.topTillTransactions.data.map((item: any, index: number) => (
+                          <tr key={index} className="border-b">
+                            <td className="p-2">{item.names || 'Unknown'}</td>
+                            <td className="p-2">{item.numbers}</td>
+                            <td className="text-right p-2">{item['Receipt No.']}</td>
+                            <td className="text-right p-2 font-semibold">KES {item.amount?.toLocaleString() || '0'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
               <div className="py-8 text-center text-muted-foreground">
-                Till No transaction details would be displayed here
+                  No Till No transaction data available
               </div>
+              )}
             </TabsContent>
 
+            {/* Send Money Transactions Tab */}
             <TabsContent value="sendmoney">
-              <div className="py-8 text-center text-muted-foreground">
-                Send Money transaction details would be displayed here
-              </div>
+              {data.topSendMoneyTransactions?.data ? (
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Name</th>
+                          <th className="text-left p-2">Number</th>
+                          <th className="text-right p-2">Transactions</th>
+                          <th className="text-right p-2">Total Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.topSendMoneyTransactions.data.map((item: any, index: number) => (
+                          <tr key={index} className="border-b">
+                            <td className="p-2">{item.names || 'Unknown'}</td>
+                            <td className="p-2">{item.numbers}</td>
+                            <td className="text-right p-2">{item['Receipt No.']}</td>
+                            <td className="text-right p-2 font-semibold">KES {item.amount?.toLocaleString() || '0'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  No Send Money transaction data available
+                </div>
+              )}
             </TabsContent>
 
-            <TabsContent value="withdrawals">
+            {/* Customer Deposit Transactions Tab */}
+            <TabsContent value="customer">
+              {data.topTransactionsCustomer?.data ? (
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Name</th>
+                          <th className="text-left p-2">Number</th>
+                          <th className="text-right p-2">Transactions</th>
+                          <th className="text-right p-2">Total Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.topTransactionsCustomer.data.map((item: any, index: number) => (
+                          <tr key={index} className="border-b">
+                            <td className="p-2">{item.names || 'Unknown'}</td>
+                            <td className="p-2">{item.numbers}</td>
+                            <td className="text-right p-2">{item['Receipt No.']}</td>
+                            <td className="text-right p-2 font-semibold text-green-600">KES {item.amount?.toLocaleString() || '0'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  No Customer Deposit transaction data available
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Received Money Transactions Tab */}
+            <TabsContent value="received">
+              {data.topTransactionsReceived?.data_final ? (
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Name</th>
+                          <th className="text-left p-2">Number</th>
+                          <th className="text-right p-2">Transactions</th>
+                          <th className="text-right p-2">Total Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.topTransactionsReceived.data_final.map((item: any, index: number) => (
+                          <tr key={index} className="border-b">
+                            <td className="p-2">{item.names || 'Unknown'}</td>
+                            <td className="p-2">{item.numbers}</td>
+                            <td className="text-right p-2">{item['Receipt No.']}</td>
+                            <td className="text-right p-2 font-semibold text-green-600">KES {item.amount?.toLocaleString() || '0'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
               <div className="py-8 text-center text-muted-foreground">
-                Withdrawal transaction details would be displayed here
+                  No Received Money transaction data available
               </div>
+              )}
+            </TabsContent>
+
+            {/* Withdrawals Tab */}
+            <TabsContent value="withdrawals">
+              {data.topWithdrawals?.data_final ? (
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Name</th>
+                          <th className="text-left p-2">Number</th>
+                          <th className="text-right p-2">Transactions</th>
+                          <th className="text-right p-2">Total Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.topWithdrawals.data_final.map((item: any, index: number) => (
+                          <tr key={index} className="border-b">
+                            <td className="p-2">{item.names || 'Unknown'}</td>
+                            <td className="p-2">{item.numbers}</td>
+                            <td className="text-right p-2">{item['Receipt No.']}</td>
+                            <td className="text-right p-2 font-semibold text-red-600">KES {item.amount?.toLocaleString() || '0'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+              <div className="py-8 text-center text-muted-foreground">
+                  No withdrawal transaction data available
+              </div>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>

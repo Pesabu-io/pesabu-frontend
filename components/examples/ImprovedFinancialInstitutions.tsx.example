@@ -1,0 +1,135 @@
+/**
+ * EXAMPLE: Enhanced Financial Institutions Component
+ * This shows how to integrate the new UI components for better UX
+ */
+
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardSkeleton } from '@/components/ui/loading-skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
+import { DataRefreshIndicator } from '@/components/ui/data-refresh-indicator';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Search, Download, Filter } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
+
+const ImprovedFinancialInstitutions = () => {
+  const [data, setData] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // ... existing fetch logic ...
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    // Refresh logic here
+    setTimeout(() => {
+      setIsRefreshing(false);
+      setLastUpdated(new Date());
+    }, 1000);
+  };
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <ErrorState
+        message="Unable to load financial institutions data"
+        error={error}
+        onRetry={handleRefresh}
+      />
+    );
+  }
+
+  // Check if data is empty
+  const hasData = Object.keys(data).length > 0 && 
+    (data.clientBanks?.banks?.length > 0 || 
+     data.mshwariLoanSummary || 
+     data.fulizaLoanSummary);
+
+  if (!hasData) {
+    return (
+      <EmptyState
+        icon={Building2}
+        title="No Financial Institutions Data"
+        description="Upload a statement to see your bank transactions, M-Shwari, and Fuliza analytics."
+        action={{
+          label: "Upload Statement",
+          onClick: () => window.location.href = '/upload'
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6 p-6">
+      {/* Enhanced Header with Search and Actions */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold">Financial Institutions</h1>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View your bank transactions, M-Shwari loans, and Fuliza usage analytics</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <p className="text-muted-foreground mt-1">
+            Bank transactions, M-Shwari, and Fuliza analytics
+          </p>
+          <DataRefreshIndicator
+            lastUpdated={lastUpdated}
+            isRefreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            className="mt-2"
+          />
+        </div>
+        
+        <div className="flex gap-2">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search banks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-64"
+            />
+          </div>
+          
+          {/* Export Button */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" onClick={() => {/* export logic */}}>
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Export data as CSV</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+
+      {/* Rest of component with filtered data based on searchQuery */}
+      {/* ... */}
+    </div>
+  );
+};
+
+export default ImprovedFinancialInstitutions;
+
