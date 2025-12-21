@@ -60,7 +60,7 @@ const PInsights = () => {
             </svg>
           </div>
           
-          <div className="container mx-auto px-6 py-12 relative z-10">
+          <div className="w-full px-6 py-12 relative z-10">
             <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
