@@ -76,12 +76,13 @@ const Lifestyle = () => {
             
             clearTimeout(timeoutId);
             return response;
-          } catch (error: any) {
+          } catch (error: unknown) {
             // Handle specific error types
-            const isNetworkError = error?.name === 'TypeError' || 
-                                 error?.message?.includes('network') ||
-                                 error?.message?.includes('ERR_NETWORK') ||
-                                 error?.name === 'AbortError';
+            const errorObj = error as { name?: string; message?: string };
+            const isNetworkError = errorObj?.name === 'TypeError' || 
+                                 errorObj?.message?.includes('network') ||
+                                 errorObj?.message?.includes('ERR_NETWORK') ||
+                                 errorObj?.name === 'AbortError';
             
             if (isNetworkError && i < retries - 1) {
               console.warn(`⚠️ Network error for ${endpoint}, retrying... (attempt ${i + 1}/${retries})`);
@@ -91,7 +92,7 @@ const Lifestyle = () => {
             }
             
             if (i === retries - 1) {
-              console.error(`❌ Failed to fetch ${endpoint} after ${retries} attempts:`, error?.message || error);
+              console.error(`❌ Failed to fetch ${endpoint} after ${retries} attempts:`, errorObj?.message || error);
               return null;
             }
             
@@ -104,7 +105,7 @@ const Lifestyle = () => {
 
       // Fetch endpoints sequentially to avoid overwhelming the server
       const endpoints = ['betting_summary_stats/', 'saving_summary_stats/', 'shopping_summary_stats/'];
-      const results: any[] = [];
+      const results: (LifestyleData['betting'] | LifestyleData['savings'] | LifestyleData['shopping'] | null)[] = [];
 
       for (const endpoint of endpoints) {
         console.log(`⏳ Fetching lifestyle endpoint: ${endpoint}`);
@@ -121,8 +122,9 @@ const Lifestyle = () => {
               console.log(`✅ Lifestyle endpoint ${endpoint} succeeded`);
               results.push(data);
             }
-          } catch (error: any) {
-            console.error(`❌ Error parsing JSON from ${endpoint}:`, error?.message || error);
+          } catch (error: unknown) {
+            const errorObj = error as { message?: string };
+            console.error(`❌ Error parsing JSON from ${endpoint}:`, errorObj?.message || error);
             results.push(null);
           }
         } else {

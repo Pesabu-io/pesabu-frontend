@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import SidebarSkeleton from "./SidebarSkeleton";
-import { Home, PieChart, Coins, Brain, Settings, Receipt, ChevronDown, ChevronRight } from "lucide-react";
+import { Home, PieChart, Coins, Brain, Settings, Receipt, ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
     { icon: Brain, text: "Credit Scoring Engine", href: "/credit-score", active: false },
   ];
 
-  const toggleSidebar = () => setIsOpen(!isOpen);
+  // const toggleSidebar = () => setIsOpen(!isOpen);
 
   useEffect(() => {
     setIsMounted(true);

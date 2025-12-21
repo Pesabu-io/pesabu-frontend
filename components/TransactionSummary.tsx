@@ -5,7 +5,6 @@ import {
   DollarSign, 
   ArrowUpDown, 
   Repeat, 
-  Percent, 
   Loader2, 
   AlertCircle,
   TrendingUp,
@@ -13,7 +12,6 @@ import {
   Calendar,
   Clock,
   BarChart4,
-  PieChart as PieChartIcon,
   ArrowUp,
   ArrowDown
 } from "lucide-react";
@@ -22,14 +20,14 @@ import { TransactionDistribution } from './TransactionDistribution';
 import { TransactionHealth } from './TransactionHealth';
 import { useTransactionData } from '@/hooks/useTransactionData';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar, ResponsiveContainer } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar, ResponsiveContainer } from 'recharts';
 
 type SortField = 'names' | 'numbers' | 'transactions' | 'amount' | 'max_amount';
 type SortDirection = 'asc' | 'desc';
 
 const TransactionDashboard = () => {
   const { transTypes, summary, insights, detailedTransactions } = useTransactionData();
-  const [timeRange, setTimeRange] = useState("30");
+  const [ setTimeRange] = useState("30");
   const [chartView, setChartView] = useState("volume");
   const [activeDetailTab, setActiveDetailTab] = useState("paybill");
   const [sortField, setSortField] = useState<SortField>('transactions');
@@ -59,12 +57,12 @@ const TransactionDashboard = () => {
     }
   };
 
-  const sortData = <T extends Record<string, any>>(data: T[], field: SortField): T[] => {
+  const sortData = <T extends Record<string, string | number | undefined>>(data: T[], field: SortField): T[] => {
     if (!data || data.length === 0) return data;
     
     const sorted = [...data].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      let aValue: string | number;
+      let bValue: string | number;
 
       switch (field) {
         case 'names':

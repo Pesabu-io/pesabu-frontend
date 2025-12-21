@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Loader2, RefreshCw, CheckCircle2 } from "lucide-react"
 // Simple date formatting function (replacing date-fns dependency)

@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
-  TrendingUp, 
-  TrendingDown, 
+  
   Shield, 
   AlertTriangle,
   CheckCircle,
@@ -354,7 +352,7 @@ const CreditScore = () => {
               <p className="font-semibold mb-2">Important Disclaimer</p>
               <p>
                 This credit score is calculated based on your M-PESA transaction patterns and may not reflect 
-                your complete credit profile. It's intended for informational purposes only and should not be 
+                your complete credit profile. It&apos;s intended for informational purposes only and should not be 
                 used as the sole basis for financial decisions. For comprehensive credit assessment, 
                 consult with financial institutions or credit bureaus.
               </p>

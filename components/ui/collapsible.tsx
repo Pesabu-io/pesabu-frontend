@@ -70,7 +70,7 @@ const CollapsibleTrigger = React.forwardRef<HTMLButtonElement, CollapsibleTrigge
         ref,
         onClick: handleClick,
         ...props,
-      } as any)
+      } as React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> })
     }
 
     return (

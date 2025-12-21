@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react"; // Added React impor
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, FileText, Lock, Shield, Loader2 } from "lucide-react"; // Removed Upload
+import {  Shield, } from "lucide-react"; // Removed Upload
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import UploadArea, { FileState } from "./upload/UploadArea";
@@ -14,21 +14,15 @@ import InfoCards from "./upload/InfoCards"; // Import the new info cards compone
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+ 
 } from "@/components/ui/dialog";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+
 import { motion } from "framer-motion";
 import { server } from "@/utils/util";
 // Removed FileState type definition
 
-const UploadStatement = () => {
+const UploadStatement =
+ () => {
   const [selectedFile, setSelectedFile] = useState<FileState>(null); // Use imported FileState type
   const [dragActive, setDragActive] = useState<boolean>(false); // Keep dragActive state here for UploadArea prop
   const [isVerificationOpen, setIsVerificationOpen] = useState<boolean>(false);
