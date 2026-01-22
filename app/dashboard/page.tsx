@@ -1,9 +1,15 @@
+"use client";
+
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const { user } = useAuth();
+  
   return (
-    
+    <ProtectedRoute>
       <div className="flex h-screen bg-white">
         <Sidebar />
         <div className="flex-1 overflow-auto">
@@ -11,7 +17,7 @@ const Index = () => {
           <main className="p-8">
             <div className="max-w-4xl mx-auto">
               <div className="bg-teal-600 text-white p-8 rounded-lg mb-8">
-                <h2 className="text-3xl font-bold mb-2">Hey, Mike</h2>
+                <h2 className="text-3xl font-bold mb-2">Hey, {user?.username || "User"}</h2>
                 <p>Welcome to Pesabu!</p>
               </div>
 
@@ -46,7 +52,7 @@ const Index = () => {
           </main>
         </div>
       </div>
-   
+    </ProtectedRoute>
   );
 };
 

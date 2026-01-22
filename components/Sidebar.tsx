@@ -1,52 +1,56 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import SidebarSkeleton from "./SidebarSkeleton";
-import { Home, PieChart, Coins, Brain, Settings, Receipt, ChevronRight } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { 
+  Home, 
+  PieChart, 
+  Coins, 
+  Brain, 
+  Settings, 
+  Receipt, 
+  ChevronRight, 
+  LogOut,
+  Sparkles,
+  Crown,
+  User,
+  Mail
+} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const Sidebar: React.FC = () => {
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const sidebarLinks = [
-    { icon: Home, text: "Home", href: "/", active: false },
-    { icon: PieChart, text: "P-insights", href: "/pinsights", active: false },
-    { icon: Coins, text: "Loan Management System", href: "/loans", active: false },
-    { icon: Brain, text: "Credit Scoring Engine", href: "/credit-score", active: false },
+    { icon: Home, text: "Home", href: "/", badge: null },
+    { icon: PieChart, text: "P-insights", href: "/pinsights", badge: null },
+    { icon: Coins, text: "Loans", href: "/loans", badge: null },
+    { icon: Brain, text: "Credit Score", href: "/credit-score", badge: "Pro" },
   ];
 
-  // const toggleSidebar = () => setIsOpen(!isOpen);
+  const footerLinks = [
+    { icon: Settings, text: "Settings", href: "/settings" },
+    { icon: Receipt, text: "Billing", href: "/billing" },
+  ];
+
+  const handleLogout = () => {
+    logout();
+    router.replace("/login");
+  };
 
   useEffect(() => {
     setIsMounted(true);
-
-    // Ensure sidebar is always visible on desktop (lg and above)
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsOpen(true);  // Open sidebar on desktop
-      } else {
-        setIsOpen(false); // Close sidebar on mobile by default
-      }
-    };
-
-    // Add event listener to handle window resize
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initialize on mount
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  // Determine active index based on pathname
-  useEffect(() => {
-    const currentIndex = sidebarLinks.findIndex(link => pathname === link.href || pathname?.startsWith(link.href + '/'));
+    const currentIndex = sidebarLinks.findIndex(
+      (link) => pathname === link.href || pathname?.startsWith(link.href + "/")
+    );
     if (currentIndex !== -1) {
       setActiveIndex(currentIndex);
     }
@@ -56,137 +60,228 @@ const Sidebar: React.FC = () => {
     return <SidebarSkeleton />;
   }
 
-  // Shopeazz-style sidebar with original content
+  const getUserInitials = () => {
+    if (user?.username) {
+      const names = user.username.split(" ");
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[1][0]}`.toUpperCase();
+      }
+      return user.username.substring(0, 2).toUpperCase();
+    }
+    const clientName =
+      typeof window !== "undefined"
+        ? localStorage.getItem("statementClientName") || "User"
+        : "User";
+    const names = clientName.split(" ");
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase();
+    }
+    return clientName.substring(0, 2).toUpperCase();
+  };
+
   return (
-    <div className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col">
+    <div className="relative w-72 h-screen bg-gradient-to-b from-white via-gray-50/30 to-white border-r border-gray-200/60 flex flex-col shadow-xl shadow-gray-900/5 backdrop-blur-sm">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgb(0,0,0)_1px,transparent_0)] [background-size:24px_24px]" />
+      </div>
+
       {/* Logo Section */}
-      <div className="p-6">
-        <div className="flex items-center gap-2">
-          <img 
-            src="https://i.postimg.cc/PrkvMc05/Artboard12.png" 
-            alt="Pesabu" 
-            className="w-8 h-8 rounded-full"
-          />
-          <span className="text-lg font-semibold text-gray-900">Pesabu</span>
-        </div>
+      <div className="relative z-10 px-6 pt-8 pb-6 border-b border-gray-200/60">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex items-center gap-3"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-pesabu-teal to-pesabu-teal/80 rounded-2xl blur-lg opacity-50" />
+            <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-pesabu-teal via-pesabu-teal/90 to-pesabu-teal/80 flex items-center justify-center shadow-lg shadow-pesabu-teal/20">
+              <span className="text-xl font-bold text-white">P</span>
+            </div>
+          </div>
+          <div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              Pesabu
+            </h1>
+            <p className="text-xs text-gray-500 font-medium">Financial Intelligence</p>
+          </div>
+        </motion.div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+      <nav className="relative z-10 flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <div className="mb-2">
+          <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            Navigation
+          </p>
+        </div>
         {sidebarLinks.map((link, index) => {
-          const isActive = pathname === link.href || pathname?.startsWith(link.href + '/') || index === activeIndex;
-          
+          const isActive =
+            pathname === link.href ||
+            pathname?.startsWith(link.href + "/") ||
+            index === activeIndex;
+
           return (
             <Link key={index} href={link.href}>
               <motion.div
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className={cn(
-                  "w-full flex items-center px-4 py-2.5 rounded-full text-sm transition-all duration-200",
-                  isActive
-                    ? "bg-primary/10 text-primary shadow-sm shadow-primary/20"
-                    : "text-gray-600 hover:bg-gray-50/80",
-                  "hover:translate-x-1"
-                )}
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveIndex(index)}
+                className="relative group"
               >
-                <div className="flex items-center gap-3">
-                  <link.icon
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      initial={false}
+                      className="absolute inset-0 bg-gradient-to-r from-pesabu-teal/10 via-pesabu-teal/8 to-transparent rounded-xl border-l-2 border-pesabu-teal"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                </AnimatePresence>
+                <div
+                  className={cn(
+                    "relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
+                    isActive
+                      ? "text-pesabu-teal"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/50"
+                  )}
+                >
+                  <div
                     className={cn(
-                      "h-5 w-5",
-                      isActive
-                        ? "text-primary"
-                        : "text-gray-400"
+                      "relative z-10 transition-all duration-200",
+                      isActive && "scale-110"
                     )}
-                  />
-                  <span>{link.text}</span>
+                  >
+                    <link.icon
+                      className={cn(
+                        "h-5 w-5 transition-colors",
+                        isActive
+                          ? "text-pesabu-teal"
+                          : "text-gray-400 group-hover:text-gray-600"
+                      )}
+                    />
+                  </div>
+                  <span className="relative z-10 font-medium text-sm flex-1">
+                    {link.text}
+                  </span>
+                  {link.badge && (
+                    <span className="relative z-10 px-2 py-0.5 text-xs font-semibold bg-gradient-to-r from-pesabu-gold/20 to-pesabu-gold/10 text-pesabu-gold rounded-md border border-pesabu-gold/20">
+                      {link.badge}
+                    </span>
+                  )}
+                  {isActive && (
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      className="relative z-10"
+                    >
+                      <ChevronRight className="h-4 w-4 text-pesabu-teal" />
+                    </motion.div>
+                  )}
                 </div>
-                {isActive && (
-                  <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-                )}
               </motion.div>
             </Link>
           );
         })}
       </nav>
 
-      {/* Premium Feature Callout */}
-      {isOpen && (
-        <motion.div 
-          className="mx-4 my-6 p-4 rounded-xl bg-gradient-to-br from-pesabu-gold/20 to-pesabu-gold/10 border border-pesabu-gold/20"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <div className="flex items-start space-x-3">
-            <div className="h-8 w-8 rounded-full bg-pesabu-gold/20 flex items-center justify-center">
-              <Brain size={16} className="text-pesabu-gold" />
+      {/* Premium Upgrade Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="relative z-10 mx-4 mb-4 p-4 rounded-2xl bg-gradient-to-br from-pesabu-gold/10 via-pesabu-gold/5 to-transparent border border-pesabu-gold/20 shadow-lg shadow-pesabu-gold/5 overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 w-20 h-20 bg-pesabu-gold/5 rounded-full blur-2xl" />
+        <div className="relative">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-pesabu-gold/20 to-pesabu-gold/10 border border-pesabu-gold/20">
+              <Crown className="h-4 w-4 text-pesabu-gold" />
             </div>
-            <div>
-              <h4 className="text-pesabu-gold font-medium text-sm">Premium Analytics</h4>
-              <p className="text-gray-600 text-xs mt-1">Unlock advanced lending insights</p>
+            <div className="flex-1">
+              <h4 className="text-sm font-bold text-gray-900 mb-0.5">
+                Unlock Premium
+              </h4>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Advanced analytics & insights
+              </p>
             </div>
           </div>
-          <motion.button 
-            className="mt-3 py-1.5 px-3 w-full rounded-lg bg-pesabu-gold/10 text-pesabu-gold text-xs font-medium hover:bg-pesabu-gold/20 transition-colors"
-            whileHover={{ scale: 1.03 }}
-            transition={{ duration: 0.2 }}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-pesabu-gold to-pesabu-gold/90 text-white text-xs font-semibold shadow-md shadow-pesabu-gold/20 hover:shadow-lg hover:shadow-pesabu-gold/30 transition-all duration-200 flex items-center justify-center gap-1.5"
           >
-            Upgrade Now
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Upgrade Now</span>
           </motion.button>
-        </motion.div>
-      )}
+        </div>
+      </motion.div>
 
       {/* Footer */}
-      <div className="mt-auto border-t border-gray-100 pt-4 pb-6 px-4 space-y-1">
-        {[
-          { icon: Settings, text: "Settings", href: "/settings" },
-          { icon: Receipt, text: "Billing", href: "/billing" },
-        ].map((item, index) => {
+      <div className="relative z-10 mt-auto border-t border-gray-200/60 bg-gradient-to-b from-transparent to-gray-50/30 pt-4 pb-6 px-4 space-y-1">
+        {/* Settings & Billing */}
+        {footerLinks.map((item, index) => {
           const isActive = pathname === item.href;
-          
           return (
             <Link key={index} href={item.href}>
               <motion.div
-                whileHover={{ scale: 1.01, x: 4 }}
-                whileTap={{ scale: 0.99 }}
+                whileHover={{ x: 2 }}
+                whileTap={{ scale: 0.98 }}
                 className={cn(
-                  "flex items-center gap-2 py-2 px-4 text-sm rounded-full transition-all duration-200",
+                  "flex items-center gap-2.5 py-2.5 px-4 text-sm rounded-xl transition-all duration-200",
                   isActive
-                    ? "text-primary bg-primary/10 shadow-sm shadow-primary/20"
-                    : "text-gray-500 hover:text-primary hover:bg-gray-50/80"
+                    ? "text-pesabu-teal bg-pesabu-teal/10"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/50"
                 )}
               >
                 <item.icon className="h-4 w-4" />
-                {item.text}
+                <span className="font-medium">{item.text}</span>
               </motion.div>
             </Link>
           );
         })}
-        
-        {/* User Profile */}
-        <motion.div
-          whileHover={{ scale: 1.01 }}
-          className="flex items-center gap-3 p-2 mt-4 rounded-full bg-gray-50 cursor-pointer group transition-all duration-200 hover:bg-gray-100"
+
+        {/* User Profile Section */}
+        <div className="mt-4 pt-4 border-t border-gray-200/60">
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-br from-gray-50 to-white border border-gray-200/60 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-pesabu-teal to-pesabu-teal/80 rounded-xl blur-md opacity-30 group-hover:opacity-50 transition-opacity" />
+              <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-pesabu-teal via-pesabu-teal/90 to-pesabu-teal/80 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-pesabu-teal/20">
+                {getUserInitials()}
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {user?.username ||
+                  (typeof window !== "undefined"
+                    ? localStorage.getItem("statementClientName") || "User"
+                    : "User")}
+              </p>
+              <p className="text-xs text-gray-500 truncate flex items-center gap-1">
+                <Mail className="h-3 w-3" />
+                {user?.email || "Member"}
+              </p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-pesabu-teal transition-colors" />
+          </motion.div>
+        </div>
+
+        {/* Logout Button */}
+        <motion.button
+          onClick={handleLogout}
+          whileHover={{ x: 2, scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full flex items-center gap-2.5 py-2.5 px-4 text-sm rounded-xl transition-all duration-200 text-red-600 hover:text-white hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 border border-red-200 hover:border-red-600 font-medium mt-2 shadow-sm hover:shadow-md"
         >
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-pesabu-teal to-primary text-white font-medium shadow-lg shadow-primary/20">
-            {(() => {
-              const clientName = typeof window !== 'undefined' ? localStorage.getItem('statementClientName') || 'User' : 'User';
-              const names = clientName.split(' ');
-              if (names.length >= 2) {
-                return `${names[0][0]}${names[1][0]}`.toUpperCase();
-              }
-              return clientName.substring(0, 2).toUpperCase();
-            })()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
-              {typeof window !== 'undefined' ? localStorage.getItem('statementClientName') || 'User' : 'User'}
-            </p>
-            <p className="text-xs text-gray-500 truncate">Analyst</p>
-          </div>
-          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors duration-200" />
-        </motion.div>
+          <LogOut className="h-4 w-4" />
+          <span>Sign Out</span>
+        </motion.button>
       </div>
     </div>
   );

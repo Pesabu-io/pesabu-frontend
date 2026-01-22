@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { 
   CreditCard, 
   FileText, 
- 
+  
   Building, 
   Activity, 
   Coffee, 
@@ -23,6 +23,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("Summary");
@@ -130,12 +131,13 @@ const Index = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <Header />
-        
-        <main className="p-6 md:p-8">
+    <ProtectedRoute>
+      <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <Header />
+          
+          <main className="p-6 md:p-8">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Decorative elements */}
             <div className="absolute top-24 right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl opacity-60 z-0"></div>
@@ -345,6 +347,7 @@ const Index = () => {
         </main>
       </div>
     </div>
+    </ProtectedRoute>
   );
 };
 

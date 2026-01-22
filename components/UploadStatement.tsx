@@ -1,30 +1,27 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from "react"; // Added React import
+import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import {  Shield, } from "lucide-react"; // Removed Upload
+import { Shield, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import UploadArea, { FileState } from "./upload/UploadArea";
 import VerificationDialogContent from "./upload/VerificationDialogContent";
 import UploadHeader from "./upload/UploadHeader";
-import InfoCards from "./upload/InfoCards"; // Import the new info cards component
+import InfoCards from "./upload/InfoCards";
 import {
   Dialog,
   DialogContent,
- 
 } from "@/components/ui/dialog";
-
 import { motion } from "framer-motion";
 import { server } from "@/utils/util";
-// Removed FileState type definition
+import ProtectedRoute from "@/components/ProtectedRoute";
 
-const UploadStatement =
- () => {
-  const [selectedFile, setSelectedFile] = useState<FileState>(null); // Use imported FileState type
-  const [dragActive, setDragActive] = useState<boolean>(false); // Keep dragActive state here for UploadArea prop
+const UploadStatement = () => {
+  const [selectedFile, setSelectedFile] = useState<FileState>(null);
+  const [dragActive, setDragActive] = useState<boolean>(false);
   const [isVerificationOpen, setIsVerificationOpen] = useState<boolean>(false);
   const [verificationCode, setVerificationCode] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -34,15 +31,11 @@ const UploadStatement =
   const router = useRouter();
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-
-  // Cleanup intervals on component unmount
   useEffect(() => {
     return () => {
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     };
   }, []);
-
-  // Removed handleDrag, handleDrop, handleFileInput (moved to UploadArea)
 
   const handleSubmit = () => {
     if (!selectedFile) {
@@ -56,7 +49,6 @@ const UploadStatement =
     setIsVerificationOpen(true);
   };
 
-  // Simulate progress updates during upload
   const simulateProgress = () => {
     let progress = 10;
     const interval = setInterval(() => {
@@ -67,7 +59,6 @@ const UploadStatement =
       }
       setUploadProgress(Math.min(progress, 90));
     }, 500);
-
     progressIntervalRef.current = interval;
   };
 
@@ -81,14 +72,13 @@ const UploadStatement =
       return;
     }
 
-    // Add null check for selectedFile to satisfy TypeScript
     if (!selectedFile) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "No file selected. Please select a file again.",
       });
-      setIsVerificationOpen(false); // Close the dialog if no file somehow
+      setIsVerificationOpen(false);
       return;
     }
 
@@ -100,17 +90,13 @@ const UploadStatement =
     formData.append("file", selectedFile.file);
     formData.append("password", verificationCode);
 
-    // Clear any existing intervals
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
 
     try {
       console.log("Attempting to upload file...");
-
-      // Start simulating progress
       simulateProgress();
       setProcessingStage("Processing your statement...");
 
-      // Upload file and process synchronously
       const uploadResponse = await fetch(`${server}/file/uploadfileandclean/`, {
         method: "POST",
         body: formData,
@@ -130,7 +116,6 @@ const UploadStatement =
       const responseData = await uploadResponse.json();
       console.log("Upload response data:", responseData);
 
-      // Clear progress interval and set to 100%
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
@@ -139,7 +124,6 @@ const UploadStatement =
       setUploadProgress(100);
       setProcessingStage("Processing complete!");
 
-      // Wait a moment for the user to see the 100% completion
       await new Promise(resolve => setTimeout(resolve, 1200));
 
       toast({
@@ -147,7 +131,6 @@ const UploadStatement =
         description: "Statement uploaded and processed successfully",
       });
 
-      // Store the data and redirect
       const { client_name, mobile_number, dataframe } = responseData;
 
       if (client_name) localStorage.setItem('statementClientName', client_name);
@@ -161,7 +144,6 @@ const UploadStatement =
     } catch (error) {
       console.error("Upload error:", error);
 
-      // Clear intervals on error
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
@@ -173,87 +155,138 @@ const UploadStatement =
         description: error instanceof Error ? error.message : "An unknown error occurred",
       });
 
-      // Reset the loading state but keep the dialog open for retry
       setIsUploading(false);
       setUploadProgress(0);
       setProcessingStage("");
     }
   };
-  // Removed formatFileSize function (moved to lib/utils)
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <Header />
-        <main className="p-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-3xl mx-auto"
-          >
-            {/* Use UploadHeader component */}
-            <UploadHeader />
-
-            {/* Main upload card */}
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-              {/* Gradient top banner */}
-              <div className="bg-gradient-to-r from-pesabu-teal to-pesabu-teal/80 h-4"></div>
-
-              <div className="p-8 md:p-10">
-                {/* Use UploadArea component */}
-                <UploadArea
-                  selectedFile={selectedFile}
-                  setSelectedFile={setSelectedFile}
-                  dragActive={dragActive}
-                  setDragActive={setDragActive}
-                />
-
-                {/* Security note */}
-                <div className="mt-8 flex items-center justify-center text-gray-500 text-sm">
-                  <Shield className="h-4 w-4 mr-2" />
-                  <span>Your data is encrypted and secure</span>
-                </div>
-
-                {/* Upload button */}
-                <div className="mt-8 text-center">
-                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                    <Button
-                      onClick={handleSubmit}
-                      className="bg-pesabu-teal hover:bg-pesabu-teal/90 text-white text-lg px-12 py-6 h-auto rounded-xl font-medium transition-all shadow"
-                      size="lg"
-                      disabled={isUploading || !selectedFile}
-                    >
-                      {isUploading ? "Processing..." : "Upload & Process Statement"}
-                    </Button>
-                  </motion.div>
-                </div>
-              </div>
+    <ProtectedRoute>
+      <div className="flex h-screen bg-background">
+        <Sidebar />
+        <div className="flex-1 overflow-auto relative">
+          {/* Premium Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50/50 z-0"></div>
+          
+          {/* Animated background elements */}
+          <div className="absolute w-full h-full overflow-hidden pointer-events-none">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.2, 1] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-1/4 -right-20 w-96 h-96 bg-pesabu-gold/10 rounded-full blur-3xl"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.3, 1] }}
+              transition={{ duration: 10, delay: 0.5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute bottom-1/4 -left-20 w-96 h-96 bg-pesabu-teal/10 rounded-full blur-3xl"
+            />
+            <div className="absolute inset-0 opacity-[0.02]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgb(0,0,0)_1px,transparent_0)] [background-size:40px_40px]" />
             </div>
+          </div>
 
-            {/* Use InfoCards component */}
-            <InfoCards />
+          <Header />
+          <main className="relative z-10 p-8 md:p-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="max-w-4xl mx-auto"
+            >
+              <UploadHeader />
 
-          </motion.div>
-        </main>
+              {/* Main upload card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="relative group"
+              >
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-pesabu-teal/20 to-pesabu-teal/10 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition-opacity" />
+                
+                <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/60 overflow-hidden">
+                  {/* Premium gradient top banner */}
+                  <div className="relative h-2 bg-gradient-to-r from-pesabu-teal via-pesabu-teal/90 to-pesabu-teal/80">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                  </div>
+
+                  <div className="p-8 md:p-12">
+                    <UploadArea
+                      selectedFile={selectedFile}
+                      setSelectedFile={setSelectedFile}
+                      dragActive={dragActive}
+                      setDragActive={setDragActive}
+                    />
+
+                    {/* Security note */}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                      className="mt-8 flex items-center justify-center gap-2 text-gray-600 text-sm"
+                    >
+                      <div className="p-1.5 rounded-lg bg-green-100">
+                        <Shield className="h-4 w-4 text-green-600" />
+                      </div>
+                      <span className="font-medium">Your data is encrypted and secure</span>
+                    </motion.div>
+
+                    {/* Upload button */}
+                    <div className="mt-10 text-center">
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button
+                          onClick={handleSubmit}
+                          disabled={isUploading || !selectedFile}
+                          className="relative group overflow-hidden bg-gradient-to-r from-pesabu-teal via-pesabu-teal/95 to-pesabu-teal hover:from-pesabu-teal/90 hover:via-pesabu-teal hover:to-pesabu-teal/90 text-white text-lg px-10 py-6 h-auto rounded-2xl font-semibold shadow-xl shadow-pesabu-teal/30 hover:shadow-2xl hover:shadow-pesabu-teal/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-pesabu-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <span className="relative z-10 flex items-center gap-2">
+                            {isUploading ? (
+                              <>
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="h-5 w-5" />
+                                Upload & Process Statement
+                              </>
+                            )}
+                          </span>
+                        </Button>
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              <InfoCards />
+            </motion.div>
+          </main>
+        </div>
+
+        {/* Verification Dialog */}
+        <Dialog open={isVerificationOpen} onOpenChange={setIsVerificationOpen}>
+          <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-xl rounded-3xl border border-gray-200/60 shadow-2xl">
+            <VerificationDialogContent
+              isUploading={isUploading}
+              uploadProgress={uploadProgress}
+              processingStage={processingStage}
+              verificationCode={verificationCode}
+              setVerificationCode={setVerificationCode}
+              handleVerification={handleVerification}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Verification Dialog */}
-      <Dialog open={isVerificationOpen} onOpenChange={setIsVerificationOpen}>
-        <DialogContent className="sm:max-w-md bg-white rounded-2xl">
-          {/* Use VerificationDialogContent component */}
-          <VerificationDialogContent
-            isUploading={isUploading}
-            uploadProgress={uploadProgress}
-            processingStage={processingStage}
-            verificationCode={verificationCode}
-            setVerificationCode={setVerificationCode}
-            handleVerification={handleVerification}
-          />
-        </DialogContent>
-      </Dialog>
-    </div>
+    </ProtectedRoute>
   );
 };
 

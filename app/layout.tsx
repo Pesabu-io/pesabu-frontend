@@ -1,6 +1,6 @@
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster"
 import { geistSans, geistMono } from "./fonts";
+import { Providers } from "@/components/Providers";
 
 export const metadata = {
   title: "Pesabu.io",
@@ -15,8 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
-        <Toaster />
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

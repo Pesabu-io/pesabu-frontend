@@ -1,15 +1,25 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { BellIcon, UserIcon,  MoonIcon, MailIcon } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 const UserHeader: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false); // State for dropdown visibility
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
   // Function to toggle dropdown
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+    setDropdownOpen(false);
   };
 
   return (
@@ -53,8 +63,8 @@ const UserHeader: React.FC = () => {
 
           {/* User Name and Role */}
           <div onClick={toggleDropdown} className="hidden sm:flex flex-col">
-            <span className="font-semibold">userName</span>
-            <span className="text-sm text-gray-500">userRole</span>
+            <span className="font-semibold">{user?.username || "Guest"}</span>
+            <span className="text-sm text-gray-500">{user?.email || ""}</span>
           </div>
 
           {/* Dropdown Menu */}
@@ -63,7 +73,12 @@ const UserHeader: React.FC = () => {
               <ul className="text-left text-sm text-gray-700 dark:text-gray-200">
                 <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">Account</li>
                 <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">Settings</li>
-                <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">Logout</li>
+                <li 
+                  className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </li>
               </ul>
             </div>
           )}

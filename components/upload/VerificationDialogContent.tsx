@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Lock } from 'lucide-react';
+import { Loader2, Lock, Shield, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DialogDescription,
@@ -35,29 +35,54 @@ const VerificationDialogContent: React.FC<VerificationDialogContentProps> = ({
 }) => {
   return (
     <>
-      <DialogHeader>
-        <DialogTitle className="text-2xl font-bold text-center text-pesabu-teal">Statement Password</DialogTitle>
-        <DialogDescription className="text-center mt-2">
-          Enter the 6-digit password provided with your M-PESA statement
+      <DialogHeader className="space-y-3">
+        <div className="flex items-center justify-center mb-2">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-pesabu-teal/20 to-pesabu-teal/10 rounded-2xl blur-xl" />
+            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-pesabu-teal/10 to-pesabu-teal/5 border border-pesabu-teal/20 flex items-center justify-center">
+              <Lock className="h-8 w-8 text-pesabu-teal" />
+            </div>
+          </div>
+        </div>
+        <DialogTitle className="text-2xl font-bold text-center text-gray-900">
+          Statement Password
+        </DialogTitle>
+        <DialogDescription className="text-center text-gray-600">
+          Enter the 6-digit password provided with your M-PESA statement PDF
         </DialogDescription>
       </DialogHeader>
+      
       {isUploading ? (
         <div className="py-8 flex flex-col items-center space-y-6">
-          <div className="w-full bg-gray-100 rounded-full h-2.5">
-            <motion.div
-              className="bg-pesabu-teal h-2.5 rounded-full"
-              initial={{ width: "0%" }}
-              animate={{ width: `${uploadProgress}%` }}
-              transition={{ duration: 0.5 }}
-            />
+          {/* Progress Bar */}
+          <div className="w-full space-y-3">
+            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+              <motion.div
+                className="bg-gradient-to-r from-pesabu-teal via-pesabu-teal/90 to-pesabu-teal h-3 rounded-full relative overflow-hidden"
+                initial={{ width: "0%" }}
+                animate={{ width: `${uploadProgress}%` }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+              </motion.div>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600 font-medium">{processingStage || "Processing..."}</span>
+              <span className="text-pesabu-teal font-bold">{uploadProgress}%</span>
+            </div>
           </div>
-          <p className="text-pesabu-teal font-medium text-center mt-4">{processingStage || "Processing..."}</p>
-          <div className="flex justify-center items-center mt-4">
-             <Loader2 className="h-8 w-8 text-pesabu-teal animate-spin" />
+          
+          {/* Loading Spinner */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative">
+              <div className="absolute inset-0 bg-pesabu-teal/20 rounded-full blur-xl" />
+              <Loader2 className="relative h-10 w-10 text-pesabu-teal animate-spin" />
+            </div>
+            <p className="text-sm text-gray-600 font-medium">Please wait while we process your statement...</p>
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center space-y-6 py-4">
+        <div className="flex flex-col items-center space-y-8 py-4">
           <InputOTP
             maxLength={6}
             value={verificationCode}
@@ -65,28 +90,36 @@ const VerificationDialogContent: React.FC<VerificationDialogContentProps> = ({
             className="gap-3"
           >
             <InputOTPGroup>
-              <InputOTPSlot index={0} className="rounded-xl h-14 w-14 text-xl" />
-              <InputOTPSlot index={1} className="rounded-xl h-14 w-14 text-xl" />
-              <InputOTPSlot index={2} className="rounded-xl h-14 w-14 text-xl" />
-              <InputOTPSlot index={3} className="rounded-xl h-14 w-14 text-xl" />
-              <InputOTPSlot index={4} className="rounded-xl h-14 w-14 text-xl" />
-              <InputOTPSlot index={5} className="rounded-xl h-14 w-14 text-xl" />
+              <InputOTPSlot index={0} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
+              <InputOTPSlot index={1} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
+              <InputOTPSlot index={2} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
+              <InputOTPSlot index={3} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
+              <InputOTPSlot index={4} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
+              <InputOTPSlot index={5} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
             </InputOTPGroup>
           </InputOTP>
+          
           <Button
             onClick={handleVerification}
-            className="w-full bg-pesabu-teal hover:bg-pesabu-teal/90 py-6 h-auto text-lg rounded-xl font-medium shadow transition-all"
             disabled={verificationCode.length !== 6}
+            className="w-full relative group overflow-hidden bg-gradient-to-r from-pesabu-teal via-pesabu-teal/95 to-pesabu-teal hover:from-pesabu-teal/90 hover:via-pesabu-teal hover:to-pesabu-teal/90 text-white py-6 h-auto text-lg rounded-2xl font-semibold shadow-xl shadow-pesabu-teal/30 hover:shadow-2xl hover:shadow-pesabu-teal/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Verify & Process
+            <div className="absolute inset-0 bg-gradient-to-r from-pesabu-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <Shield className="h-5 w-5" />
+              Verify & Process
+            </span>
           </Button>
         </div>
       )}
-      <DialogFooter className="sm:justify-center mt-2">
-        <p className="text-xs text-gray-500 text-center flex items-center justify-center">
-          <Lock className="h-3 w-3 mr-1" />
-          This password is provided in your statement PDF
-        </p>
+      
+      <DialogFooter className="sm:justify-center mt-4 pt-4 border-t border-gray-200">
+        <div className="flex items-center gap-2 text-xs text-gray-500">
+          <div className="p-1 rounded-lg bg-gray-100">
+            <Lock className="h-3 w-3" />
+          </div>
+          <span>This password is provided in your statement PDF</span>
+        </div>
       </DialogFooter>
     </>
   );

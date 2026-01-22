@@ -1,21 +1,19 @@
 import {
-    BarChart3Icon,
-    FileText,
-    FileTextIcon,
+   
     HomeIcon,
     LogOutIcon,
-    PieChartIcon,
+    
     UserIcon,
-  List, ProportionsIcon, StarIcon,
+  List, StarIcon,
     ChartPie,
-    Layers3,
+    
     FerrisWheel,
     Building2,
     Zap
   } from "lucide-react";
   
 
-  export const server = 'http://164.68.115.204:8000';
+  export const server = 'http://51.11.182.211:8000';
   
   export const mainMenuItems = [
     { name: "Home", icon: HomeIcon, href: "/", color: "text-blue-500" },

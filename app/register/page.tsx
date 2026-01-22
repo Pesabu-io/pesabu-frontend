@@ -2,114 +2,330 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiUser, FiMail, FiPhone, FiBriefcase } from "react-icons/fi";
+import { motion } from "framer-motion";
+import { FiUser, FiMail, FiLock, FiArrowRight, FiCheck } from "react-icons/fi";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function RegistrationForm() {
-  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [company, setCompany] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { signup } = useAuth();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ fullName, email, phone, company });
-    router.push("/welcome"); // Redirect after successful registration
+    setError("");
+    setLoading(true);
+
+    try {
+      await signup({ username, email, password });
+      router.replace("/pinsights");
+    } catch (err: any) {
+      setError(err.message || "Failed to register. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Password strength indicator
+  const getPasswordStrength = () => {
+    if (password.length === 0) return { strength: 0, text: "" };
+    if (password.length < 6) return { strength: 1, text: "Weak", color: "bg-red-500" };
+    if (password.length < 8) return { strength: 2, text: "Fair", color: "bg-yellow-500" };
+    if (password.length < 12) return { strength: 3, text: "Good", color: "bg-blue-500" };
+    return { strength: 4, text: "Strong", color: "bg-green-500" };
+  };
+
+  const passwordStrength = getPasswordStrength();
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-themeTeal">
-      <div className="p-8 bg-white text-gray-800 shadow-2xl rounded-xl max-w-lg w-full">
-        {/* Welcome Section */}
-        <div className="text-center mb-6">
-          <img
-            src="https://i.postimg.cc/bvnYCBVg/Whats-App-Image-2024-11-21-at-12-26-59.jpg"
-            alt="Welcome Illustration"
-            className="mx-auto mb-4 w-24 h-24 rounded-full shadow-md"
-          />
-          <h2 className="text-2xl font-bold">Create Your Account</h2>
-          <p className="text-sm text-gray-500">Join us and get started!</p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-1/4 -right-20 w-96 h-96 bg-pesabu-teal/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 -left-20 w-96 h-96 bg-pesabu-gold/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+        />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmOWZhZmIiIGZpbGwtb3BhY2l0eT0iMC40Ij48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-40" />
+      </div>
 
-        {/* Registration Form */}
-        <form onSubmit={handleRegister} className="space-y-4">
-          {/* Full Name Field */}
-          <div className="relative">
-            <FiUser className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              id="fullName"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="block pl-12 pr-4 py-3 w-full rounded-lg bg-gray-50 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-700 shadow-sm"
-              placeholder="Full Name"
-              required
-            />
-          </div>
-
-          {/* Email Field */}
-          <div className="relative">
-            <FiMail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="block pl-12 pr-4 py-3 w-full rounded-lg bg-gray-50 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-700 shadow-sm"
-              placeholder="Email"
-              required
-            />
-          </div>
-
-          {/* Phone Number Field */}
-          <div className="relative">
-            <FiPhone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="tel"
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="block pl-12 pr-4 py-3 w-full rounded-lg bg-gray-50 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-700 shadow-sm"
-              placeholder="Phone Number"
-              required
-            />
-          </div>
-
-          {/* Company Field */}
-          <div className="relative">
-            <FiBriefcase className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              id="company"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className="block pl-12 pr-4 py-3 w-full rounded-lg bg-gray-50 text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-700 shadow-sm"
-              placeholder="Company"
-              required
-            />
-          </div>
-
-          {/* Register Button */}
-          <button
-            type="submit"
-            className="w-full py-3 rounded-lg bg-teal-600 text-white font-bold shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 transform transition duration-200 hover:scale-105"
-          >
-            Register
-          </button>
-        </form>
-
-        {/* Already Have an Account */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-500">
-            Already have an account?{" "}
-            <button
-              className="text-teal-600 hover:underline"
-              onClick={() => router.push("/login")}
+      {/* Main content */}
+      <div className="relative z-10 w-full max-w-md px-6 sm:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100/50 p-8 sm:p-10"
+        >
+          {/* Logo/Brand Section */}
+          <div className="text-center mb-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pesabu-teal to-pesabu-teal/80 mb-4 shadow-lg shadow-pesabu-teal/20"
             >
-              Login
+              <span className="text-2xl font-bold text-white">P</span>
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-3xl font-bold text-gray-900 mb-2"
+            >
+              Create Your Account
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-gray-500 text-sm"
+            >
+              Join Pesabu and start your financial journey
+            </motion.p>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2"
+            >
+              <div className="w-5 h-5 rounded-full bg-red-200 flex items-center justify-center flex-shrink-0">
+                <span className="text-red-600 text-xs">!</span>
+              </div>
+              <span>{error}</span>
+            </motion.div>
+          )}
+
+          {/* Registration Form */}
+          <form onSubmit={handleRegister} className="space-y-5">
+            {/* Username Field */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="space-y-2"
+            >
+              <label
+                htmlFor="username"
+                className="text-sm font-medium text-gray-700 block"
+              >
+                Username
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiUser className="h-5 w-5 text-gray-400 group-focus-within:text-pesabu-teal transition-colors" />
+                </div>
+                <input
+                  type="text"
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="block w-full pl-12 pr-4 py-3.5 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pesabu-teal/20 focus:border-pesabu-teal transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="Choose a username"
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </motion.div>
+
+            {/* Email Field */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="space-y-2"
+            >
+              <label
+                htmlFor="email"
+                className="text-sm font-medium text-gray-700 block"
+              >
+                Email Address
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiMail className="h-5 w-5 text-gray-400 group-focus-within:text-pesabu-teal transition-colors" />
+                </div>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="block w-full pl-12 pr-4 py-3.5 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pesabu-teal/20 focus:border-pesabu-teal transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="Enter your email"
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </motion.div>
+
+            {/* Password Field */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="space-y-2"
+            >
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-gray-700 block"
+              >
+                Password
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiLock className="h-5 w-5 text-gray-400 group-focus-within:text-pesabu-teal transition-colors" />
+                </div>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full pl-12 pr-4 py-3.5 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pesabu-teal/20 focus:border-pesabu-teal transition-all duration-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="Create a password (min. 6 characters)"
+                  required
+                  disabled={loading}
+                  minLength={6}
+                />
+              </div>
+              {/* Password Strength Indicator */}
+              {password.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="space-y-1.5"
+                >
+                  <div className="flex gap-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    {[1, 2, 3, 4].map((level) => (
+                      <div
+                        key={level}
+                        className={`flex-1 transition-all duration-300 ${
+                          level <= passwordStrength.strength
+                            ? passwordStrength.color
+                            : "bg-transparent"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {passwordStrength.text && (
+                    <p className="text-xs text-gray-500">
+                      Password strength:{" "}
+                      <span className={`font-medium ${
+                        passwordStrength.strength === 1 ? "text-red-500" :
+                        passwordStrength.strength === 2 ? "text-yellow-500" :
+                        passwordStrength.strength === 3 ? "text-blue-500" :
+                        "text-green-500"
+                      }`}>
+                        {passwordStrength.text}
+                      </span>
+                    </p>
+                  )}
+                </motion.div>
+              )}
+            </motion.div>
+
+            {/* Register Button */}
+            <motion.button
+              type="submit"
+              disabled={loading}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-pesabu-teal to-pesabu-teal/90 text-white font-semibold shadow-lg shadow-pesabu-teal/30 hover:shadow-xl hover:shadow-pesabu-teal/40 focus:outline-none focus:ring-2 focus:ring-pesabu-teal/20 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 group"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Creating Account...</span>
+                </>
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <FiArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </motion.button>
+          </form>
+
+          {/* Divider */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
+            className="relative my-8"
+          >
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Already have an account?</span>
+            </div>
+          </motion.div>
+
+          {/* Sign In Link */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+            className="text-center"
+          >
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="text-sm text-gray-600 hover:text-pesabu-teal transition-colors font-medium inline-flex items-center gap-1 group"
+            >
+              <span>Sign in instead</span>
+              <FiArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </button>
+          </motion.div>
+        </motion.div>
+
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1 }}
+          className="mt-8 text-center"
+        >
+          <p className="text-xs text-gray-400">
+            By creating an account, you agree to our{" "}
+            <a href="#" className="text-pesabu-teal hover:underline">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="#" className="text-pesabu-teal hover:underline">
+              Privacy Policy
+            </a>
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
