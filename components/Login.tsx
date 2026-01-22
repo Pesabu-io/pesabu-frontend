@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { FiUser, FiLock, FiArrowRight } from "react-icons/fi";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
@@ -13,6 +14,7 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
+  const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +23,10 @@ export default function LoginForm() {
 
     try {
       await login({ username, password });
+      toast({
+        title: "Login successful",
+        description: "Welcome back! Redirecting to your dashboard...",
+      });
       router.replace("/pinsights");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to login. Please check your credentials.");
