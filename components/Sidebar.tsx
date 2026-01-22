@@ -20,13 +20,22 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ open, onOpenChange }) => {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const isMobile = useIsMobile();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const sidebarLinks = useMemo(() => [
     { icon: Home, text: "Home", href: "/", badge: null },
@@ -58,6 +67,25 @@ const Sidebar: React.FC = () => {
     }
   }, [pathname, sidebarLinks]);
 
+  // Sync with external open state
+  useEffect(() => {
+    if (open !== undefined) {
+      setMobileOpen(open);
+    }
+  }, [open]);
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setMobileOpen(newOpen);
+    onOpenChange?.(newOpen);
+  };
+
+  // Close sidebar on mobile when link is clicked
+  const handleLinkClick = () => {
+    if (isMobile) {
+      handleOpenChange(false);
+    }
+  };
+
   if (!isMounted) {
     return <SidebarSkeleton />;
   }
@@ -81,8 +109,8 @@ const Sidebar: React.FC = () => {
     return clientName.substring(0, 2).toUpperCase();
   };
 
-  return (
-    <div className="relative w-72 h-screen bg-gradient-to-b from-white via-gray-50/30 to-white border-r border-gray-200/60 flex flex-col shadow-xl shadow-gray-900/5 backdrop-blur-sm">
+  const sidebarContent = (
+    <div className="relative w-full h-full bg-gradient-to-b from-white via-gray-50/30 to-white flex flex-col backdrop-blur-sm">
       {/* Subtle background pattern */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgb(0,0,0)_1px,transparent_0)] [background-size:24px_24px]" />
@@ -125,7 +153,7 @@ const Sidebar: React.FC = () => {
             index === activeIndex;
 
           return (
-            <Link key={index} href={link.href}>
+            <Link key={index} href={link.href} onClick={handleLinkClick}>
               <motion.div
                 whileHover={{ x: 4 }}
                 whileTap={{ scale: 0.98 }}
@@ -228,7 +256,7 @@ const Sidebar: React.FC = () => {
         {footerLinks.map((item, index) => {
           const isActive = pathname === item.href;
           return (
-            <Link key={index} href={item.href}>
+            <Link key={index} href={item.href} onClick={handleLinkClick}>
               <motion.div
                 whileHover={{ x: 2 }}
                 whileTap={{ scale: 0.98 }}
@@ -285,6 +313,26 @@ const Sidebar: React.FC = () => {
           <span>Sign Out</span>
         </motion.button>
       </div>
+    </div>
+  );
+
+  // Mobile: Use Sheet component
+  if (isMobile) {
+    return (
+      <Sheet open={mobileOpen} onOpenChange={handleOpenChange}>
+        <SheetContent side="left" className="w-72 p-0 border-r border-gray-200/60">
+          <div className="h-full overflow-y-auto">
+            {sidebarContent}
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: Fixed sidebar
+  return (
+    <div className="relative w-72 h-screen bg-gradient-to-b from-white via-gray-50/30 to-white border-r border-gray-200/60 flex flex-col shadow-xl shadow-gray-900/5 backdrop-blur-sm">
+      {sidebarContent}
     </div>
   );
 };

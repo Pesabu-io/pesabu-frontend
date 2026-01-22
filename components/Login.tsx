@@ -68,12 +68,12 @@ export default function LoginForm() {
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 w-full max-w-md px-6 sm:px-8">
+      <div className="relative z-10 w-full max-w-md px-4 sm:px-6 md:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100/50 p-8 sm:p-10"
+          className="bg-white/80 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-2xl border border-gray-100/50 p-6 sm:p-8 md:p-10"
         >
           {/* Logo/Brand Section */}
           <div className="text-center mb-8">
@@ -89,7 +89,7 @@ export default function LoginForm() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-3xl font-bold text-gray-900 mb-2"
+              className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2"
             >
               Welcome Back
             </motion.h1>
@@ -97,7 +97,7 @@ export default function LoginForm() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-gray-500 text-sm"
+              className="text-gray-500 text-xs sm:text-sm"
             >
               Sign in to continue to Pesabu
             </motion.p>

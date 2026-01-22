@@ -27,6 +27,7 @@ const UploadStatement = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [processingStage, setProcessingStage] = useState<string>("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -164,7 +165,7 @@ const UploadStatement = () => {
   return (
     <ProtectedRoute>
       <div className="flex h-screen bg-background">
-        <Sidebar />
+        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
         <div className="flex-1 overflow-auto relative">
           {/* Premium Background */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50/50 z-0"></div>
@@ -188,8 +189,8 @@ const UploadStatement = () => {
             </div>
           </div>
 
-          <Header />
-          <main className="relative z-10 p-8 md:p-12">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+          <main className="relative z-10 p-4 sm:p-6 md:p-8 lg:p-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -214,7 +215,7 @@ const UploadStatement = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                   </div>
 
-                  <div className="p-8 md:p-12">
+                  <div className="p-4 sm:p-6 md:p-8 lg:p-12">
                     <UploadArea
                       selectedFile={selectedFile}
                       setSelectedFile={setSelectedFile}
@@ -227,16 +228,16 @@ const UploadStatement = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.4 }}
-                      className="mt-8 flex items-center justify-center gap-2 text-gray-600 text-sm"
+                      className="mt-6 sm:mt-8 flex items-center justify-center gap-2 text-gray-600 text-xs sm:text-sm"
                     >
                       <div className="p-1.5 rounded-lg bg-green-100">
-                        <Shield className="h-4 w-4 text-green-600" />
+                        <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                       </div>
                       <span className="font-medium">Your data is encrypted and secure</span>
                     </motion.div>
 
                     {/* Upload button */}
-                    <div className="mt-10 text-center">
+                    <div className="mt-6 sm:mt-8 md:mt-10 text-center">
                       <motion.div
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -244,19 +245,19 @@ const UploadStatement = () => {
                         <Button
                           onClick={handleSubmit}
                           disabled={isUploading || !selectedFile}
-                          className="relative group overflow-hidden bg-gradient-to-r from-pesabu-teal via-pesabu-teal/95 to-pesabu-teal hover:from-pesabu-teal/90 hover:via-pesabu-teal hover:to-pesabu-teal/90 text-white text-lg px-10 py-6 h-auto rounded-2xl font-semibold shadow-xl shadow-pesabu-teal/30 hover:shadow-2xl hover:shadow-pesabu-teal/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="relative group overflow-hidden bg-gradient-to-r from-pesabu-teal via-pesabu-teal/95 to-pesabu-teal hover:from-pesabu-teal/90 hover:via-pesabu-teal hover:to-pesabu-teal/90 text-white text-base sm:text-lg px-6 sm:px-8 md:px-10 py-4 sm:py-5 md:py-6 h-auto rounded-xl sm:rounded-2xl font-semibold shadow-xl shadow-pesabu-teal/30 hover:shadow-2xl hover:shadow-pesabu-teal/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <div className="absolute inset-0 bg-gradient-to-r from-pesabu-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                           <span className="relative z-10 flex items-center gap-2">
                             {isUploading ? (
                               <>
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Processing...
+                                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span className="text-sm sm:text-base">Processing...</span>
                               </>
                             ) : (
                               <>
-                                <Sparkles className="h-5 w-5" />
-                                Upload & Process Statement
+                                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+                                <span className="text-sm sm:text-base">Upload & Process Statement</span>
                               </>
                             )}
                           </span>

@@ -26,12 +26,12 @@ const MetricCard = ({
     : value;
 
   return (
-    <div className={`bg-white p-6 rounded-xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 ${className}`}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-gray-500 text-sm font-medium">{title}</h3>
-        {icon && <div className="p-2 bg-primary/10 rounded-lg">{icon}</div>}
+    <div className={`bg-white p-4 sm:p-6 rounded-xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 ${className}`}>
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <h3 className="text-gray-500 text-xs sm:text-sm font-medium">{title}</h3>
+        {icon && <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">{icon}</div>}
       </div>
-      <div className="text-3xl font-bold text-gray-900">{formattedValue}</div>
+      <div className="text-2xl sm:text-3xl font-bold text-gray-900">{formattedValue}</div>
       
       {subtitle && (
         <p className="text-sm text-gray-500 mt-1">{subtitle}</p>

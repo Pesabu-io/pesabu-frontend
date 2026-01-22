@@ -12,6 +12,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 const PInsights = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   
   useEffect(() => {
@@ -37,10 +38,10 @@ const PInsights = () => {
   return (
     <ProtectedRoute>
       <div className="flex h-screen bg-background">
-        <Sidebar />
+        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
         
         <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
+          <Header onMenuClick={() => setSidebarOpen(true)} />
           
           <main className="flex-1 overflow-y-auto relative">
             {/* Premium Gradient Background */}
@@ -66,22 +67,22 @@ const PInsights = () => {
               </div>
             </div>
             
-            <div className="w-full px-6 py-16 relative z-10">
+            <div className="w-full px-4 sm:px-6 py-8 sm:py-12 md:py-16 relative z-10">
               <div className="flex flex-col items-center justify-center text-center max-w-4xl mx-auto">
                 {/* Badge */}
                 <motion.div
                   initial={{ opacity: 0, y: 20, scale: 0.9 }}
                   animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20, scale: isLoaded ? 1 : 0.9 }}
                   transition={{ duration: 0.6 }}
-                  className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 bg-gradient-to-r from-pesabu-gold/10 via-pesabu-gold/5 to-transparent border border-pesabu-gold/20 rounded-full backdrop-blur-sm"
+                  className="inline-flex items-center gap-2 mb-4 sm:mb-6 px-3 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-pesabu-gold/10 via-pesabu-gold/5 to-transparent border border-pesabu-gold/20 rounded-full backdrop-blur-sm"
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-pesabu-gold" />
-                  <span className="text-pesabu-gold font-semibold text-sm">P-Insights Platform</span>
+                  <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-pesabu-gold" />
+                  <span className="text-pesabu-gold font-semibold text-xs sm:text-sm">P-Insights Platform</span>
                 </motion.div>
                 
                 {/* Main Heading */}
                 <motion.h1 
-                  className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent leading-tight"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent leading-tight px-2"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
@@ -94,7 +95,7 @@ const PInsights = () => {
                 
                 {/* Subtitle */}
                 <motion.p
-                  className="text-gray-600 max-w-2xl mx-auto mb-12 text-lg md:text-xl leading-relaxed"
+                  className="text-gray-600 max-w-2xl mx-auto mb-8 sm:mb-12 text-base sm:text-lg md:text-xl leading-relaxed px-4"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
@@ -109,7 +110,7 @@ const PInsights = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
                   transition={{ duration: 0.6, delay: 0.5 }}
-                  className="flex flex-wrap justify-center gap-3 mb-12"
+                  className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-12 px-4"
                 >
                   {securityFeatures.map((item, index) => (
                     <motion.div
@@ -136,7 +137,7 @@ const PInsights = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
                   transition={{ duration: 0.6, delay: 0.7 }}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12 w-full max-w-3xl"
+                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-12 w-full max-w-3xl px-4"
                 >
                   {benefits.map((benefit, index) => (
                     <motion.div
@@ -181,7 +182,7 @@ const PInsights = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-pesabu-teal to-pesabu-teal/80 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition-opacity" />
                     
                     {/* Main button */}
-                    <div className="relative flex items-center gap-4 px-8 py-5 bg-gradient-to-r from-pesabu-teal via-pesabu-teal/95 to-pesabu-teal text-white rounded-2xl shadow-2xl shadow-pesabu-teal/30 overflow-hidden">
+                    <div className="relative flex items-center gap-3 sm:gap-4 px-4 sm:px-6 md:px-8 py-4 sm:py-5 bg-gradient-to-r from-pesabu-teal via-pesabu-teal/95 to-pesabu-teal text-white rounded-xl sm:rounded-2xl shadow-2xl shadow-pesabu-teal/30 overflow-hidden">
                       {/* Animated background */}
                       <motion.div 
                         className="absolute inset-0 bg-gradient-to-r from-pesabu-gold/20 to-transparent"
@@ -190,15 +191,15 @@ const PInsights = () => {
                         transition={{ duration: 0.6 }}
                       />
                       
-                      <div className="relative z-10 flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Upload className="h-7 w-7" />
+                      <div className="relative z-10 flex items-center gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg sm:rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Upload className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
                         </div>
                         <div className="text-left">
-                          <div className="text-xl font-bold">Start Analysis</div>
-                          <div className="text-sm opacity-90">Upload your M-Pesa statement</div>
+                          <div className="text-base sm:text-lg md:text-xl font-bold">Start Analysis</div>
+                          <div className="text-xs sm:text-sm opacity-90">Upload your M-Pesa statement</div>
                         </div>
-                        <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
                   </motion.button>

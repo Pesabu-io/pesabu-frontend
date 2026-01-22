@@ -96,9 +96,9 @@ const DocumentInfo: React.FC<DocumentInfoProps> = ({
         transition={{ duration: 0.8 }}
       />
       
-      <Card className="relative overflow-hidden backdrop-blur-sm bg-white/90 rounded-3xl border border-teal-100 shadow-xl p-0">
+      <Card className="relative overflow-hidden backdrop-blur-sm bg-white/90 rounded-2xl sm:rounded-3xl border border-teal-100 shadow-xl p-0">
         {/* Header with decorative elements */}
-        <div className="relative pt-6 px-8 pb-4">
+        <div className="relative pt-4 sm:pt-6 px-4 sm:px-6 md:px-8 pb-3 sm:pb-4">
           <motion.div 
             className="absolute top-0 right-0 w-32 h-32 bg-teal-100/30 rounded-full -mr-10 -mt-10"
             variants={decorationVariants}
@@ -120,15 +120,15 @@ const DocumentInfo: React.FC<DocumentInfoProps> = ({
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-600 to-teal-500 flex items-center justify-center shadow-md mr-4">
-                <FileText className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-teal-600 to-teal-500 flex items-center justify-center shadow-md mr-3 sm:mr-4">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600">
                   Document Information
                 </h2>
                 {documentInfo.dateUploaded && (
-                  <p className="text-sm text-gray-500">Uploaded {documentInfo.dateUploaded}</p>
+                  <p className="text-xs sm:text-sm text-gray-500">Uploaded {documentInfo.dateUploaded}</p>
                 )}
               </div>
             </motion.div>
@@ -140,7 +140,7 @@ const DocumentInfo: React.FC<DocumentInfoProps> = ({
             >
               <Badge 
                 variant="secondary" 
-                className={`px-5 py-1.5 text-sm font-medium rounded-full shadow-sm ${getStatusStyles(documentInfo.status)}`}
+                className={`px-3 sm:px-5 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-full shadow-sm ${getStatusStyles(documentInfo.status)}`}
               >
                 {documentInfo.status}
               </Badge>
@@ -157,12 +157,12 @@ const DocumentInfo: React.FC<DocumentInfoProps> = ({
         
         {/* Content section with animated info cards */}
         <motion.div 
-          className="p-8 pt-4"
+          className="p-4 sm:p-6 md:p-8 pt-3 sm:pt-4"
           variants={containerVariants}
           initial="hidden"
           animate="show"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div className="space-y-4">
               <InfoCard 
                 icon={<User className="w-5 h-5 text-teal-600" />}
@@ -212,12 +212,12 @@ const DocumentInfo: React.FC<DocumentInfoProps> = ({
           
           {/* Actions section */}
           <motion.div 
-            className="mt-8 flex flex-wrap gap-4 justify-end"
+            className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-4 justify-end"
             variants={itemVariants}
           >
             {documentInfo.fileSize && (
-              <div className="flex items-center mr-auto text-sm text-gray-500">
-                <Shield className="w-4 h-4 mr-1 text-teal-500" />
+              <div className="flex items-center mr-auto text-xs sm:text-sm text-gray-500">
+                <Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-teal-500" />
                 <span>Secure file </span>
               </div>
             )}
@@ -226,20 +226,20 @@ const DocumentInfo: React.FC<DocumentInfoProps> = ({
               <Button 
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2 rounded-lg border-teal-200 text-teal-700 hover:bg-teal-50"
+                className="flex items-center gap-1.5 sm:gap-2 rounded-lg border-teal-200 text-teal-700 hover:bg-teal-50 text-xs sm:text-sm px-3 sm:px-4"
                 onClick={onDownload}
               >
-                <Download className="w-4 h-4" /> Download
+                <Download className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden sm:inline">Download</span>
               </Button>
             )}
             
             {onViewDetails && (
               <Button 
                 size="sm"
-                className="flex items-center gap-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm px-3 sm:px-4"
                 onClick={onViewDetails}
               >
-                <ExternalLink className="w-4 h-4" /> View Details
+                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden sm:inline">View Details</span>
               </Button>
             )}
           </motion.div>
@@ -273,15 +273,15 @@ const InfoCard: React.FC<InfoCardProps> = ({ icon, label, value, variants }) => 
       className="group relative overflow-hidden rounded-xl border border-teal-50 hover:border-teal-200 bg-white shadow-sm hover:shadow-md transition-all duration-300"
     >
       <div className="absolute top-0 left-0 h-full w-1.5 bg-teal-500/20 group-hover:bg-teal-500 transition-colors duration-300"></div>
-      <div className="flex items-center p-4">
-        <div className="flex-shrink-0 mr-4">
-          <div className="w-10 h-10 rounded-full bg-teal-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+      <div className="flex items-center p-3 sm:p-4">
+        <div className="flex-shrink-0 mr-3 sm:mr-4">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-teal-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
             {icon}
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="font-semibold text-gray-900 truncate">{value}</p>
+          <p className="text-xs sm:text-sm font-medium text-gray-500">{label}</p>
+          <p className="text-sm sm:text-base font-semibold text-gray-900 truncate">{value}</p>
         </div>
       </div>
     </motion.div>

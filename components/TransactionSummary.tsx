@@ -210,17 +210,17 @@ const TransactionDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6 p-6 bg-slate-50 min-h-screen">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-slate-50 min-h-screen">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Transaction Analytics Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Transaction Analytics Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Comprehensive overview of financial movements and customer behavior
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <Select defaultValue="30" onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Time Range" />
             </SelectTrigger>
             <SelectContent>
@@ -230,7 +230,7 @@ const TransactionDashboard = () => {
               <SelectItem value="365">Last Year</SelectItem>
             </SelectContent>
           </Select>
-          <div className="text-sm text-muted-foreground bg-white px-3 py-2 rounded-md border shadow-sm">
+          <div className="text-xs sm:text-sm text-muted-foreground bg-white px-3 py-2 rounded-md border shadow-sm">
             Last updated: {new Date().toLocaleString('en-US', { 
               dateStyle: 'medium', 
               timeStyle: 'short' 
@@ -239,55 +239,67 @@ const TransactionDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map((card, index) => (
           <SummaryCard key={index} {...card} />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card className="lg:col-span-2">
           <CardHeader className="space-y-0 pb-3">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-lg font-medium">Transaction Activity</CardTitle>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <CardTitle className="text-base sm:text-lg font-medium">Transaction Activity</CardTitle>
               <div className="flex space-x-2">
                 <button 
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md ${chartView === 'volume' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium rounded-md ${chartView === 'volume' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
                   onClick={() => setChartView('volume')}
                 >
                   Volume
                 </button>
                 <button 
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md ${chartView === 'value' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium rounded-md ${chartView === 'value' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
                   onClick={() => setChartView('value')}
                 >
                   Value
                 </button>
               </div>
             </div>
-            <CardDescription>Transaction patterns by day of week</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Transaction patterns by day of week</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
+            <div className="h-[250px] sm:h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 {chartView === 'volume' ? (
                   <BarChart data={dailyChartData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    margin={{ top: 5, right: 10, left: 0, bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="day" />
-                    <YAxis />
+                    <XAxis 
+                      dataKey="day" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip />
-                    <Legend />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
                     <Bar dataKey="transactions" name="Transactions" fill="#3b82f6" />
                   </BarChart>
                 ) : (
                   <BarChart data={dailyChartData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    margin={{ top: 20, right: 10, left: 0, bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="day" />
-                    <YAxis />
+                    <XAxis 
+                      dataKey="day" 
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip formatter={(value) => `KES ${value?.toLocaleString()}`} />
-                    <Legend />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
                     <Bar dataKey="amount" name="Amount" fill="#16a34a" />
                   </BarChart>
                 )}
@@ -297,38 +309,38 @@ const TransactionDashboard = () => {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">Transaction Breakdown</CardTitle>
-            <CardDescription>Distribution by transaction type</CardDescription>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg font-medium">Transaction Breakdown</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Distribution by transaction type</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="count">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="count">Count</TabsTrigger>
-                <TabsTrigger value="value">Value</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-3 sm:mb-4">
+                <TabsTrigger value="count" className="text-xs sm:text-sm">Count</TabsTrigger>
+                <TabsTrigger value="value" className="text-xs sm:text-sm">Value</TabsTrigger>
               </TabsList>
               <TabsContent value="count">
                 <TransactionDistribution summary={summary.data} />
               </TabsContent>
               <TabsContent value="value">
-                <div className="space-y-4">
-                  <div className="flex justify-between">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
                     <div className="space-y-1">
-                      <div className="text-sm font-medium text-muted-foreground">Total Deposits</div>
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-xs sm:text-sm font-medium text-muted-foreground">Total Deposits</div>
+                      <div className="text-xl sm:text-2xl font-bold text-green-600">
                         KES {summary.data?.total_received.toLocaleString()}
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-sm font-medium text-muted-foreground">Total Withdrawals</div>
-                      <div className="text-2xl font-bold text-red-600">
+                      <div className="text-xs sm:text-sm font-medium text-muted-foreground">Total Withdrawals</div>
+                      <div className="text-xl sm:text-2xl font-bold text-red-600">
                         KES {summary.data?.total_withdrawn.toLocaleString()}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="mt-6 pt-6 border-t">
-                    <div className="text-sm font-medium mb-2">Value Ratio</div>
+                  <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t">
+                    <div className="text-xs sm:text-sm font-medium mb-2">Value Ratio</div>
                     <div className="h-2 bg-gray-200 rounded-full">
                       <div 
                         className="h-2 bg-green-500 rounded-l-full" 
@@ -347,24 +359,24 @@ const TransactionDashboard = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <TransactionHealth insights={insights} summary={summary} />
         
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">Transaction Timing</CardTitle>
-            <CardDescription>When users prefer to transact</CardDescription>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg font-medium">Transaction Timing</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">When users prefer to transact</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {hourlyChartData.length > 0 ? (
                 hourlyChartData.slice(0, 8).map((item) => {
                   const total = hourlyChartData.reduce((sum, i) => sum + i.transactions, 0);
                   return (
                     <div key={item.hour} className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm font-medium">{item.hour}</span>
-                        <span className="text-sm text-muted-foreground">{item.transactions} transactions</span>
+                        <span className="text-xs sm:text-sm font-medium">{item.hour}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">{item.transactions} transactions</span>
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full">
                         <div 
@@ -376,12 +388,12 @@ const TransactionDashboard = () => {
                   );
                 })
               ) : (
-                <div className="text-sm text-muted-foreground">No hourly data available</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">No hourly data available</div>
               )}
             </div>
             {hourlyChartData.length > 0 && (
-              <div className="mt-6 pt-4 border-t">
-                <div className="text-sm font-medium mb-2">
+              <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t">
+                <div className="text-xs sm:text-sm font-medium mb-1 sm:mb-2">
                   Peak transaction time: {hourlyChartData.reduce((max, item) => 
                     item.transactions > max.transactions ? item : max, hourlyChartData[0]
                   )?.hour || 'N/A'}
@@ -395,45 +407,45 @@ const TransactionDashboard = () => {
         </Card>
         
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">Recent Highlights</CardTitle>
-            <CardDescription>Notable transaction metrics</CardDescription>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg font-medium">Recent Highlights</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Notable transaction metrics</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="p-2 bg-emerald-50 rounded-full">
-                  <Calendar className="h-5 w-5 text-emerald-500" />
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-1.5 sm:p-2 bg-emerald-50 rounded-full">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
                 </div>
                 <div>
-                  <div className="text-sm font-medium">Busiest Day</div>
-                  <div className="text-2xl font-bold">Wednesday</div>
+                  <div className="text-xs sm:text-sm font-medium">Busiest Day</div>
+                  <div className="text-xl sm:text-2xl font-bold">Wednesday</div>
                   <div className="text-xs text-muted-foreground">
                     {Math.round((summary.data?.deposit_count ?? 0) * 0.22)} transactions processed
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
-                <div className="p-2 bg-orange-50 rounded-full">
-                  <BarChart4 className="h-5 w-5 text-orange-500" />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-1.5 sm:p-2 bg-orange-50 rounded-full">
+                  <BarChart4 className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
                 </div>
                 <div>
-                  <div className="text-sm font-medium">Largest Transaction</div>
-                  <div className="text-2xl font-bold">KES {summary.data?.top_deposit.toLocaleString()}</div>
+                  <div className="text-xs sm:text-sm font-medium">Largest Transaction</div>
+                  <div className="text-xl sm:text-2xl font-bold">KES {summary.data?.top_deposit.toLocaleString()}</div>
                   <div className="text-xs text-muted-foreground">
                     {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
-                <div className="p-2 bg-blue-50 rounded-full">
-                  <Clock className="h-5 w-5 text-blue-500" />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-1.5 sm:p-2 bg-blue-50 rounded-full">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                 </div>
                 <div>
-                  <div className="text-sm font-medium">Processing Efficiency</div>
-                  <div className="text-2xl font-bold">{Math.round((insights?.totalTransactions ?? 0) / 30 / 24 * 1.5)} / hour</div>
+                  <div className="text-xs sm:text-sm font-medium">Processing Efficiency</div>
+                  <div className="text-xl sm:text-2xl font-bold">{Math.round((insights?.totalTransactions ?? 0) / 30 / 24 * 1.5)} / hour</div>
                   <div className="text-xs text-muted-foreground">
                     Average transaction processing rate
                   </div>
@@ -446,29 +458,29 @@ const TransactionDashboard = () => {
 
       {/* Top Transactions by Type */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">Top Transactions by Type</CardTitle>
-          <CardDescription>Most frequent transaction partners and patterns</CardDescription>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-base sm:text-lg font-medium">Top Transactions by Type</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">Most frequent transaction partners and patterns</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeDetailTab} onValueChange={setActiveDetailTab}>
-            <TabsList className="grid w-full grid-cols-6 mb-4">
-              <TabsTrigger value="paybill">Pay Bill</TabsTrigger>
-              <TabsTrigger value="till">Till No</TabsTrigger>
-              <TabsTrigger value="sendmoney">Send Money</TabsTrigger>
-              <TabsTrigger value="customer">Customer</TabsTrigger>
-              <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
-              <TabsTrigger value="received">Received</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 mb-3 sm:mb-4 h-auto p-1 gap-1">
+              <TabsTrigger value="paybill" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">Pay Bill</TabsTrigger>
+              <TabsTrigger value="till" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">Till No</TabsTrigger>
+              <TabsTrigger value="sendmoney" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">Send Money</TabsTrigger>
+              <TabsTrigger value="customer" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">Customer</TabsTrigger>
+              <TabsTrigger value="withdrawals" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">Withdrawals</TabsTrigger>
+              <TabsTrigger value="received" className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">Received</TabsTrigger>
             </TabsList>
 
             <TabsContent value="paybill">
               {detailedTransactions?.topPaybill && detailedTransactions.topPaybill.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full border-collapse min-w-[600px]">
                     <thead>
                       <tr className="border-b">
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('names')}
                         >
                           <div className="flex items-center">
@@ -477,7 +489,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('numbers')}
                         >
                           <div className="flex items-center">
@@ -486,7 +498,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('transactions')}
                         >
                           <div className="flex items-center justify-end">
@@ -495,7 +507,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('amount')}
                         >
                           <div className="flex items-center justify-end">
@@ -508,28 +520,28 @@ const TransactionDashboard = () => {
                     <tbody>
                       {sortedPaybill.map((item, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="p-2">{item.names || 'Unknown'}</td>
-                          <td className="p-2">{item.numbers || 'N/A'}</td>
-                          <td className="text-right p-2">{item.receipt_count || item['Receipt No.'] || 0}</td>
-                          <td className="text-right p-2 font-semibold">KES {(item.max_amount || item.amount || 0).toLocaleString()}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item.receipt_count || item['Receipt No.'] || 0}</td>
+                          <td className="text-right p-2 sm:p-3 font-semibold text-xs sm:text-sm">KES {(item.max_amount || item.amount || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div className="py-8 text-center text-muted-foreground">No Pay Bill transaction data available</div>
+                <div className="py-8 text-center text-sm text-muted-foreground">No Pay Bill transaction data available</div>
               )}
             </TabsContent>
 
             <TabsContent value="till">
               {detailedTransactions?.topTill && detailedTransactions.topTill.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full border-collapse min-w-[600px]">
                     <thead>
                       <tr className="border-b">
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('names')}
                         >
                           <div className="flex items-center">
@@ -538,7 +550,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('numbers')}
                         >
                           <div className="flex items-center">
@@ -547,7 +559,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('transactions')}
                         >
                           <div className="flex items-center justify-end">
@@ -556,7 +568,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('amount')}
                         >
                           <div className="flex items-center justify-end">
@@ -569,28 +581,28 @@ const TransactionDashboard = () => {
                     <tbody>
                       {sortedTill.map((item, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="p-2">{item.names || 'Unknown'}</td>
-                          <td className="p-2">{item.numbers || 'N/A'}</td>
-                          <td className="text-right p-2">{item.receipt_count || item['Receipt No.'] || 0}</td>
-                          <td className="text-right p-2 font-semibold">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item.receipt_count || item['Receipt No.'] || 0}</td>
+                          <td className="text-right p-2 sm:p-3 font-semibold text-xs sm:text-sm">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div className="py-8 text-center text-muted-foreground">No Till No transaction data available</div>
+                <div className="py-8 text-center text-sm text-muted-foreground">No Till No transaction data available</div>
               )}
             </TabsContent>
 
             <TabsContent value="sendmoney">
               {detailedTransactions?.topSendMoney && detailedTransactions.topSendMoney.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full border-collapse min-w-[600px]">
                     <thead>
                       <tr className="border-b">
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('names')}
                         >
                           <div className="flex items-center">
@@ -599,7 +611,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('numbers')}
                         >
                           <div className="flex items-center">
@@ -608,7 +620,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('transactions')}
                         >
                           <div className="flex items-center justify-end">
@@ -617,7 +629,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('amount')}
                         >
                           <div className="flex items-center justify-end">
@@ -630,28 +642,28 @@ const TransactionDashboard = () => {
                     <tbody>
                       {sortedSendMoney.map((item, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="p-2">{item.names || 'Unknown'}</td>
-                          <td className="p-2">{item.numbers || 'N/A'}</td>
-                          <td className="text-right p-2">{item.receipt_count || item['Receipt No.'] || 0}</td>
-                          <td className="text-right p-2 font-semibold">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item.receipt_count || item['Receipt No.'] || 0}</td>
+                          <td className="text-right p-2 sm:p-3 font-semibold text-xs sm:text-sm">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div className="py-8 text-center text-muted-foreground">No Send Money transaction data available</div>
+                <div className="py-8 text-center text-sm text-muted-foreground">No Send Money transaction data available</div>
               )}
             </TabsContent>
 
             <TabsContent value="customer">
               {detailedTransactions?.topCustomer && detailedTransactions.topCustomer.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full border-collapse min-w-[600px]">
                     <thead>
                       <tr className="border-b">
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('names')}
                         >
                           <div className="flex items-center">
@@ -660,7 +672,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('numbers')}
                         >
                           <div className="flex items-center">
@@ -669,7 +681,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('transactions')}
                         >
                           <div className="flex items-center justify-end">
@@ -678,7 +690,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('amount')}
                         >
                           <div className="flex items-center justify-end">
@@ -691,28 +703,28 @@ const TransactionDashboard = () => {
                     <tbody>
                       {sortedCustomer.map((item, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="p-2">{item.names || 'Unknown'}</td>
-                          <td className="p-2">{item.numbers || 'N/A'}</td>
-                          <td className="text-right p-2">{item['Receipt No.'] || item.receipt_count || 0}</td>
-                          <td className="text-right p-2 font-semibold text-green-600">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item['Receipt No.'] || item.receipt_count || 0}</td>
+                          <td className="text-right p-2 sm:p-3 font-semibold text-green-600 text-xs sm:text-sm">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div className="py-8 text-center text-muted-foreground">No Customer Deposit transaction data available</div>
+                <div className="py-8 text-center text-sm text-muted-foreground">No Customer Deposit transaction data available</div>
               )}
             </TabsContent>
 
             <TabsContent value="withdrawals">
               {detailedTransactions?.topWithdrawals && detailedTransactions.topWithdrawals.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full border-collapse min-w-[600px]">
                     <thead>
                       <tr className="border-b">
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('names')}
                         >
                           <div className="flex items-center">
@@ -721,7 +733,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('numbers')}
                         >
                           <div className="flex items-center">
@@ -730,7 +742,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('transactions')}
                         >
                           <div className="flex items-center justify-end">
@@ -739,7 +751,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('amount')}
                         >
                           <div className="flex items-center justify-end">
@@ -752,28 +764,28 @@ const TransactionDashboard = () => {
                     <tbody>
                       {sortedWithdrawals.map((item, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="p-2">{item.names || 'Unknown'}</td>
-                          <td className="p-2">{item.numbers || 'N/A'}</td>
-                          <td className="text-right p-2">{item['Receipt No.'] || item.receipt_count || 0}</td>
-                          <td className="text-right p-2 font-semibold text-red-600">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item['Receipt No.'] || item.receipt_count || 0}</td>
+                          <td className="text-right p-2 sm:p-3 font-semibold text-red-600 text-xs sm:text-sm">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div className="py-8 text-center text-muted-foreground">No withdrawal transaction data available</div>
+                <div className="py-8 text-center text-sm text-muted-foreground">No withdrawal transaction data available</div>
               )}
             </TabsContent>
 
             <TabsContent value="received">
               {detailedTransactions?.topReceived && detailedTransactions.topReceived.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full border-collapse min-w-[600px]">
                     <thead>
                       <tr className="border-b">
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('names')}
                         >
                           <div className="flex items-center">
@@ -782,7 +794,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-left p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-left p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('numbers')}
                         >
                           <div className="flex items-center">
@@ -791,7 +803,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('transactions')}
                         >
                           <div className="flex items-center justify-end">
@@ -800,7 +812,7 @@ const TransactionDashboard = () => {
                           </div>
                         </th>
                         <th 
-                          className="text-right p-2 cursor-pointer hover:bg-gray-50 select-none"
+                          className="text-right p-2 sm:p-3 cursor-pointer hover:bg-gray-50 select-none text-xs sm:text-sm"
                           onClick={() => handleSort('amount')}
                         >
                           <div className="flex items-center justify-end">
@@ -813,17 +825,17 @@ const TransactionDashboard = () => {
                     <tbody>
                       {sortedReceived.map((item, index) => (
                         <tr key={index} className="border-b hover:bg-gray-50">
-                          <td className="p-2">{item.names || 'Unknown'}</td>
-                          <td className="p-2">{item.numbers || 'N/A'}</td>
-                          <td className="text-right p-2">{item['Receipt No.'] || item.receipt_count || 0}</td>
-                          <td className="text-right p-2 font-semibold text-green-600">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
+                          <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
+                          <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item['Receipt No.'] || item.receipt_count || 0}</td>
+                          <td className="text-right p-2 sm:p-3 font-semibold text-green-600 text-xs sm:text-sm">KES {(item.amount || item.max_amount || 0).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div className="py-8 text-center text-muted-foreground">No Received Money transaction data available</div>
+                <div className="py-8 text-center text-sm text-muted-foreground">No Received Money transaction data available</div>
               )}
             </TabsContent>
           </Tabs>

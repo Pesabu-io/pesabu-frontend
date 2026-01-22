@@ -344,12 +344,12 @@ const FinancialInstitutions = () => {
   })) || [];
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8 p-4 sm:p-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Financial Institutions</h1>
-          <p className="text-muted-foreground">Bank transactions, M-Shwari, and Fuliza analytics</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Financial Institutions</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Bank transactions, M-Shwari, and Fuliza analytics</p>
         </div>
         <button 
           onClick={fetchFinancialInstitutionsData}
@@ -360,24 +360,24 @@ const FinancialInstitutions = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Bank Transactions */}
         <Card className="overflow-hidden border-t-4 border-t-blue-500">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-blue-500" />
-                  <h3 className="font-medium">Bank Transactions</h3>
+                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                  <h3 className="text-sm sm:text-base font-medium">Bank Transactions</h3>
                 </div>
-                <p className="text-3xl font-bold mt-2">
+                <p className="text-2xl sm:text-3xl font-bold mt-2">
                   {data.clientBanks?.count || 0}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   {data.clientBanks?.banks?.length || 0} banks
                 </p>
               </div>
-              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
                 Active
               </Badge>
             </div>
@@ -386,21 +386,21 @@ const FinancialInstitutions = () => {
 
         {/* M-Shwari */}
         <Card className="overflow-hidden border-t-4 border-t-green-500">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2">
-                  <PiggyBank className="h-5 w-5 text-green-500" />
-                  <h3 className="font-medium">M-Shwari</h3>
+                  <PiggyBank className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+                  <h3 className="text-sm sm:text-base font-medium">M-Shwari</h3>
                 </div>
-                <p className="text-3xl font-bold mt-2">
+                <p className="text-2xl sm:text-3xl font-bold mt-2">
                   {data.mshwariTransactions?.count || 0}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   {data.mshwariLoanSummary?.total_loan_count || 0} loans
                 </p>
               </div>
-              <Badge variant="outline" className="bg-green-50 text-green-700">
+              <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
                 KES {data.mshwariLoanSummary?.total_loan_disbursed_amount?.toLocaleString() || '0'}
               </Badge>
             </div>
@@ -409,21 +409,21 @@ const FinancialInstitutions = () => {
 
         {/* Fuliza */}
         <Card className="overflow-hidden border-t-4 border-t-red-500">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-red-500" />
-                  <h3 className="font-medium">Fuliza</h3>
+                  <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+                  <h3 className="text-sm sm:text-base font-medium">Fuliza</h3>
                 </div>
-                <p className="text-3xl font-bold mt-2">
+                <p className="text-2xl sm:text-3xl font-bold mt-2">
                   {data.fulizaLoanSummary?.total_loan_count || 0}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   KES {data.fulizaLoanSummary?.total_loan_balance?.toLocaleString() || '0'} balance
                 </p>
               </div>
-              <Badge variant="outline" className="bg-red-50 text-red-700">
+              <Badge variant="outline" className="bg-red-50 text-red-700 text-xs">
                 KES {data.fulizaLoanSummary?.total_loan_disbursed_amount?.toLocaleString() || '0'}
               </Badge>
             </div>
@@ -432,21 +432,21 @@ const FinancialInstitutions = () => {
 
         {/* Bank Summary */}
         <Card className="overflow-hidden border-t-4 border-t-purple-500">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2">
-                  <Banknote className="h-5 w-5 text-purple-500" />
-                  <h3 className="font-medium">Bank Activity</h3>
+                  <Banknote className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+                  <h3 className="text-sm sm:text-base font-medium">Bank Activity</h3>
                 </div>
-                <p className="text-3xl font-bold mt-2">
+                <p className="text-2xl sm:text-3xl font-bold mt-2">
                   KES {data.bankReceivedSummary?.total_amount_received?.toLocaleString() || '0'}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   Total received
                 </p>
               </div>
-              <Badge variant="outline" className="bg-purple-50 text-purple-700">
+              <Badge variant="outline" className="bg-purple-50 text-purple-700 text-xs">
                 KES {data.bankSentSummary?.total_amount_sent?.toLocaleString() || '0'} sent
               </Badge>
             </div>
@@ -455,23 +455,29 @@ const FinancialInstitutions = () => {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Top Banks by Received Count */}
         {bankReceivedData.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
                 Top Banks by Received Count
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[350px]">
+              <div className="h-[250px] sm:h-[300px] md:h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={bankReceivedData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                    <YAxis />
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={80}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip />
                     <Bar dataKey="count" fill="#8884d8" />
                   </BarChart>
@@ -484,19 +490,25 @@ const FinancialInstitutions = () => {
         {/* Top Banks by Sent Count */}
         {bankSentData.length > 0 && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
                 Top Banks by Sent Count
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[350px]">
+              <div className="h-[250px] sm:h-[300px] md:h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={bankSentData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                    <YAxis />
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={80}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip />
                     <Bar dataKey="count" fill="#8884d8" />
                   </BarChart>
@@ -509,64 +521,64 @@ const FinancialInstitutions = () => {
 
       {/* Detailed Analytics Tabs */}
       <Card>
-        <CardHeader>
-          <CardTitle>Detailed Financial Analytics</CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-base sm:text-lg">Detailed Financial Analytics</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="banks">
-            <TabsList className="mb-4">
-              <TabsTrigger value="banks" className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-blue-500" />
+            <TabsList className="mb-3 sm:mb-4 flex-wrap h-auto p-1">
+              <TabsTrigger value="banks" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">
+                <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
                 Banks
               </TabsTrigger>
-              <TabsTrigger value="mshwari" className="flex items-center gap-2">
-                <PiggyBank className="h-4 w-4 text-green-500" />
+              <TabsTrigger value="mshwari" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">
+                <PiggyBank className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                 M-Shwari
               </TabsTrigger>
-              <TabsTrigger value="fuliza" className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-red-500" />
+              <TabsTrigger value="fuliza" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2">
+                <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
                 Fuliza
               </TabsTrigger>
             </TabsList>
 
             {/* Banks Tab */}
             <TabsContent value="banks">
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Bank Summary Metrics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <TrendingUp className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Highest Received</p>
-                    <p className="font-bold">KES {data.bankReceivedSummary?.highest_amount_received?.toLocaleString() || '0'}</p>
-                    <p className="text-xs text-muted-foreground">{data.bankReceivedSummary?.highest_amount_bank || 'N/A'}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
+                    <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 mx-auto mb-1.5 sm:mb-2" />
+                    <p className="text-xs sm:text-sm text-muted-foreground">Highest Received</p>
+                    <p className="text-sm sm:text-base font-bold mt-1">KES {data.bankReceivedSummary?.highest_amount_received?.toLocaleString() || '0'}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{data.bankReceivedSummary?.highest_amount_bank || 'N/A'}</p>
                   </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <TrendingDown className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Lowest Received</p>
-                    <p className="font-bold">KES {data.bankReceivedSummary?.lowest_amount_received?.toLocaleString() || '0'}</p>
-                    <p className="text-xs text-muted-foreground">{data.bankReceivedSummary?.lowest_amount_bank || 'N/A'}</p>
+                  <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
+                    <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 mx-auto mb-1.5 sm:mb-2" />
+                    <p className="text-xs sm:text-sm text-muted-foreground">Lowest Received</p>
+                    <p className="text-sm sm:text-base font-bold mt-1">KES {data.bankReceivedSummary?.lowest_amount_received?.toLocaleString() || '0'}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{data.bankReceivedSummary?.lowest_amount_bank || 'N/A'}</p>
                   </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <TrendingUp className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Highest Sent</p>
-                    <p className="font-bold">KES {data.bankSentSummary?.highest_amount_sent?.toLocaleString() || '0'}</p>
-                    <p className="text-xs text-muted-foreground">{data.bankSentSummary?.highest_amount_bank || 'N/A'}</p>
+                  <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
+                    <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 mx-auto mb-1.5 sm:mb-2" />
+                    <p className="text-xs sm:text-sm text-muted-foreground">Highest Sent</p>
+                    <p className="text-sm sm:text-base font-bold mt-1">KES {data.bankSentSummary?.highest_amount_sent?.toLocaleString() || '0'}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{data.bankSentSummary?.highest_amount_bank || 'N/A'}</p>
                   </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <TrendingDown className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Lowest Sent</p>
-                    <p className="font-bold">KES {data.bankSentSummary?.lowest_amount_sent?.toLocaleString() || '0'}</p>
-                    <p className="text-xs text-muted-foreground">{data.bankSentSummary?.lowest_amount_bank || 'N/A'}</p>
+                  <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
+                    <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 mx-auto mb-1.5 sm:mb-2" />
+                    <p className="text-xs sm:text-sm text-muted-foreground">Lowest Sent</p>
+                    <p className="text-sm sm:text-base font-bold mt-1">KES {data.bankSentSummary?.lowest_amount_sent?.toLocaleString() || '0'}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{data.bankSentSummary?.lowest_amount_bank || 'N/A'}</p>
                   </div>
                 </div>
 
                 {/* Connected Banks */}
                 {data.clientBanks?.banks && data.clientBanks.banks.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">Connected Banks</h3>
+                    <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Connected Banks</h3>
                     <div className="flex flex-wrap gap-2">
                       {data.clientBanks.banks.map((bank, index) => (
-                        <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700">
+                        <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 text-xs sm:text-sm">
                           {bank}
                         </Badge>
                       ))}
@@ -579,97 +591,97 @@ const FinancialInstitutions = () => {
             {/* M-Shwari Tab */}
             <TabsContent value="mshwari">
               {data.mshwariLoanSummary ? (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <PiggyBank className="h-6 w-6 text-green-500 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Total Loans</p>
-                      <p className="font-bold">{data.mshwariLoanSummary.total_loan_count}</p>
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                    <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
+                      <PiggyBank className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 mx-auto mb-1.5 sm:mb-2" />
+                      <p className="text-xs sm:text-sm text-muted-foreground">Total Loans</p>
+                      <p className="text-sm sm:text-base font-bold mt-1">{data.mshwariLoanSummary.total_loan_count}</p>
                     </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <TrendingUp className="h-6 w-6 text-green-500 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Highest Disbursed</p>
-                      <p className="font-bold">KES {data.mshwariLoanSummary.highest_loan_disbursed.toLocaleString()}</p>
+                    <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
+                      <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 mx-auto mb-1.5 sm:mb-2" />
+                      <p className="text-xs sm:text-sm text-muted-foreground">Highest Disbursed</p>
+                      <p className="text-sm sm:text-base font-bold mt-1">KES {data.mshwariLoanSummary.highest_loan_disbursed.toLocaleString()}</p>
                     </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <TrendingDown className="h-6 w-6 text-green-500 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Highest Repaid</p>
-                      <p className="font-bold">KES {data.mshwariLoanSummary.highest_loan_paid_back.toLocaleString()}</p>
+                    <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
+                      <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 mx-auto mb-1.5 sm:mb-2" />
+                      <p className="text-xs sm:text-sm text-muted-foreground">Highest Repaid</p>
+                      <p className="text-sm sm:text-base font-bold mt-1">KES {data.mshwariLoanSummary.highest_loan_paid_back.toLocaleString()}</p>
                     </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <Calendar className="h-6 w-6 text-green-500 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Last Disbursement</p>
-                      <p className="font-bold text-xs">
+                    <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
+                      <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 mx-auto mb-1.5 sm:mb-2" />
+                      <p className="text-xs sm:text-sm text-muted-foreground">Last Disbursement</p>
+                      <p className="text-xs sm:text-sm font-bold mt-1">
                         {new Date(data.mshwariLoanSummary.date_of_last_loan_disbursement).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <h4 className="font-semibold mb-2">Loan Summary</h4>
-                      <p className="text-sm">Total Disbursed: KES {data.mshwariLoanSummary.total_loan_disbursed_amount.toLocaleString()}</p>
-                      <p className="text-sm">Total Repaid: KES {data.mshwariLoanSummary.total_loan_paid_back_amount.toLocaleString()}</p>
-                      <p className="text-sm">Last Borrowed: KES {data.mshwariLoanSummary.last_amount_borrowed.toLocaleString()}</p>
-                      <p className="text-sm">Last Repaid: KES {data.mshwariLoanSummary.last_amount_paid_back.toLocaleString()}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="p-3 sm:p-4 bg-green-50 rounded-lg">
+                      <h4 className="text-sm sm:text-base font-semibold mb-2">Loan Summary</h4>
+                      <p className="text-xs sm:text-sm mb-1">Total Disbursed: KES {data.mshwariLoanSummary.total_loan_disbursed_amount.toLocaleString()}</p>
+                      <p className="text-xs sm:text-sm mb-1">Total Repaid: KES {data.mshwariLoanSummary.total_loan_paid_back_amount.toLocaleString()}</p>
+                      <p className="text-xs sm:text-sm mb-1">Last Borrowed: KES {data.mshwariLoanSummary.last_amount_borrowed.toLocaleString()}</p>
+                      <p className="text-xs sm:text-sm">Last Repaid: KES {data.mshwariLoanSummary.last_amount_paid_back.toLocaleString()}</p>
                     </div>
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <h4 className="font-semibold mb-2">Recent Activity</h4>
-                      <p className="text-sm">Last Repayment: {new Date(data.mshwariLoanSummary.date_of_last_loan_repayment).toLocaleDateString()}</p>
+                    <div className="p-3 sm:p-4 bg-green-50 rounded-lg">
+                      <h4 className="text-sm sm:text-base font-semibold mb-2">Recent Activity</h4>
+                      <p className="text-xs sm:text-sm">Last Repayment: {new Date(data.mshwariLoanSummary.date_of_last_loan_repayment).toLocaleDateString()}</p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="py-8 text-center text-muted-foreground">No M-Shwari data available</div>
+                <div className="py-8 text-center text-sm text-muted-foreground">No M-Shwari data available</div>
               )}
             </TabsContent>
 
             {/* Fuliza Tab */}
             <TabsContent value="fuliza">
               {data.fulizaLoanSummary ? (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <CreditCard className="h-6 w-6 text-red-500 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Total Loans</p>
-                      <p className="font-bold">{data.fulizaLoanSummary.total_loan_count}</p>
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                    <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
+                      <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 mx-auto mb-1.5 sm:mb-2" />
+                      <p className="text-xs sm:text-sm text-muted-foreground">Total Loans</p>
+                      <p className="text-sm sm:text-base font-bold mt-1">{data.fulizaLoanSummary.total_loan_count}</p>
                     </div>
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <TrendingUp className="h-6 w-6 text-red-500 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Highest Disbursed</p>
-                      <p className="font-bold">KES {data.fulizaLoanSummary.highest_loan_disbursed.toLocaleString()}</p>
+                    <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
+                      <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 mx-auto mb-1.5 sm:mb-2" />
+                      <p className="text-xs sm:text-sm text-muted-foreground">Highest Disbursed</p>
+                      <p className="text-sm sm:text-base font-bold mt-1">KES {data.fulizaLoanSummary.highest_loan_disbursed.toLocaleString()}</p>
                     </div>
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <TrendingDown className="h-6 w-6 text-red-500 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Highest Repaid</p>
-                      <p className="font-bold">KES {data.fulizaLoanSummary.highest_loan_paid_back.toLocaleString()}</p>
+                    <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
+                      <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 mx-auto mb-1.5 sm:mb-2" />
+                      <p className="text-xs sm:text-sm text-muted-foreground">Highest Repaid</p>
+                      <p className="text-sm sm:text-base font-bold mt-1">KES {data.fulizaLoanSummary.highest_loan_paid_back.toLocaleString()}</p>
                     </div>
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <Calendar className="h-6 w-6 text-red-500 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Last Disbursement</p>
-                      <p className="font-bold text-xs">
+                    <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
+                      <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 mx-auto mb-1.5 sm:mb-2" />
+                      <p className="text-xs sm:text-sm text-muted-foreground">Last Disbursement</p>
+                      <p className="text-xs sm:text-sm font-bold mt-1">
                         {new Date(data.fulizaLoanSummary.date_of_last_loan_disbursement).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-red-50 rounded-lg">
-                      <h4 className="font-semibold mb-2">Loan Summary</h4>
-                      <p className="text-sm">Total Disbursed: KES {data.fulizaLoanSummary.total_loan_disbursed_amount.toLocaleString()}</p>
-                      <p className="text-sm">Total Repaid: KES {data.fulizaLoanSummary.total_loan_paid_back_amount.toLocaleString()}</p>
-                      <p className="text-sm">Current Balance: KES {data.fulizaLoanSummary.total_loan_balance.toLocaleString()}</p>
-                      <p className="text-sm">Last Borrowed: KES {data.fulizaLoanSummary.last_amount_borrowed.toLocaleString()}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="p-3 sm:p-4 bg-red-50 rounded-lg">
+                      <h4 className="text-sm sm:text-base font-semibold mb-2">Loan Summary</h4>
+                      <p className="text-xs sm:text-sm mb-1">Total Disbursed: KES {data.fulizaLoanSummary.total_loan_disbursed_amount.toLocaleString()}</p>
+                      <p className="text-xs sm:text-sm mb-1">Total Repaid: KES {data.fulizaLoanSummary.total_loan_paid_back_amount.toLocaleString()}</p>
+                      <p className="text-xs sm:text-sm mb-1">Current Balance: KES {data.fulizaLoanSummary.total_loan_balance.toLocaleString()}</p>
+                      <p className="text-xs sm:text-sm">Last Borrowed: KES {data.fulizaLoanSummary.last_amount_borrowed.toLocaleString()}</p>
                     </div>
-                    <div className="p-4 bg-red-50 rounded-lg">
-                      <h4 className="font-semibold mb-2">Recent Activity</h4>
-                      <p className="text-sm">Last Repayment: {new Date(data.fulizaLoanSummary.date_of_last_loan_repayment).toLocaleDateString()}</p>
-                      <p className="text-sm">Last Repaid: KES {data.fulizaLoanSummary.last_amount_paid_back.toLocaleString()}</p>
+                    <div className="p-3 sm:p-4 bg-red-50 rounded-lg">
+                      <h4 className="text-sm sm:text-base font-semibold mb-2">Recent Activity</h4>
+                      <p className="text-xs sm:text-sm mb-1">Last Repayment: {new Date(data.fulizaLoanSummary.date_of_last_loan_repayment).toLocaleDateString()}</p>
+                      <p className="text-xs sm:text-sm">Last Repaid: KES {data.fulizaLoanSummary.last_amount_paid_back.toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="py-8 text-center text-muted-foreground">No Fuliza data available</div>
+                <div className="py-8 text-center text-sm text-muted-foreground">No Fuliza data available</div>
               )}
             </TabsContent>
           </Tabs>

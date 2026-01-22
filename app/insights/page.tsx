@@ -29,6 +29,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("Summary");
   const [client, setClient] = useState();
   const [number, setNumber] = useState();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { insights } = useTransactionData();
   const { data, insights: financialInsights } = useFinancialInstitutionsData();
@@ -133,15 +134,15 @@ const Index = () => {
   return (
     <ProtectedRoute>
       <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <Sidebar />
+        <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
         <div className="flex-1 overflow-auto">
-          <Header />
+          <Header onMenuClick={() => setSidebarOpen(true)} />
           
-          <main className="p-6 md:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Decorative elements */}
-            <div className="absolute top-24 right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl opacity-60 z-0"></div>
-            <div className="absolute bottom-24 left-24 w-64 h-64 bg-blue-100/20 rounded-full blur-3xl opacity-60 z-0"></div>
+          <main className="p-4 sm:p-6 md:p-8">
+          <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+            {/* Decorative elements - hidden on mobile */}
+            <div className="hidden md:block absolute top-24 right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl opacity-60 z-0"></div>
+            <div className="hidden md:block absolute bottom-24 left-24 w-64 h-64 bg-blue-100/20 rounded-full blur-3xl opacity-60 z-0"></div>
             
             {/* Document Info Section - With Glass Effect */}
             <motion.div
@@ -163,7 +164,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative mb-6"
+              className="relative mb-4 sm:mb-6"
             >
               <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
               
@@ -175,14 +176,14 @@ const Index = () => {
                     setActiveTab(value);
                   }}
                 >
-                  <div className="px-4 pt-4 pb-2">
-                    <TabsList className="relative grid grid-cols-5 gap-2 bg-transparent p-0">
+                  <div className="px-2 sm:px-4 pt-3 sm:pt-4 pb-2 overflow-x-auto">
+                    <TabsList className="relative inline-flex gap-1 sm:gap-2 bg-transparent p-0 min-w-full sm:grid sm:grid-cols-5">
                       {tabs.map((tab) => (
                         <TabsTrigger
                           key={tab.id}
                           value={tab.id}
                           className={`
-                            group relative px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300
+                            group relative flex-shrink-0 px-2 sm:px-3 md:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap
                             ${tab.id === activeTab 
                               ? "text-primary bg-white shadow-md border border-gray-100" 
                               : "text-gray-600 hover:text-gray-900 hover:bg-white/50"}
@@ -196,12 +197,12 @@ const Index = () => {
                           />
                           
                           <motion.div
-                            className="relative flex items-center justify-center"
+                            className="relative flex items-center justify-center gap-1 sm:gap-2"
                             whileHover={{ scale: 1.03 }}
                             transition={{ duration: 0.2 }}
                           >
-                            {tab.icon}
-                            <span>{tab.id}</span>
+                            <span className="hidden sm:inline">{tab.icon}</span>
+                            <span className="truncate">{tab.id}</span>
                             
                             {/* Animated indicator */}
                             {tab.id === activeTab && (
@@ -230,12 +231,12 @@ const Index = () => {
                 transition={{ duration: 0.4 }}
                 className="relative"
               >
-                {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-10 -mt-10 blur-xl"></div>
-                <div className="absolute bottom-0 left-0 w-40 h-40 bg-teal-100/10 rounded-full -ml-10 -mb-10 blur-xl"></div>
+                {/* Decorative elements - hidden on mobile */}
+                <div className="hidden sm:block absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-10 -mt-10 blur-xl"></div>
+                <div className="hidden sm:block absolute bottom-0 left-0 w-40 h-40 bg-teal-100/10 rounded-full -ml-10 -mb-10 blur-xl"></div>
                 
                 {/* Content card with glass effect */}
-                <Card className="relative bg-white/95 backdrop-blur-sm overflow-hidden rounded-xl shadow-xl border border-gray-100/80 p-6">
+                <Card className="relative bg-white/95 backdrop-blur-sm overflow-hidden rounded-xl shadow-xl border border-gray-100/80 p-4 sm:p-6">
                   {/* Top decorative accent */}
                   <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
                   
@@ -249,13 +250,13 @@ const Index = () => {
                     >
                       <motion.h2 
                         variants={itemVariants}
-                        className="text-xl font-semibold text-gray-800 mb-4 flex items-center"
+                        className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center"
                       >
-                        <div className="w-2 h-8 bg-gradient-to-b from-primary to-primary/30 rounded-full mr-3"></div>
+                        <div className="w-1.5 sm:w-2 h-6 sm:h-8 bg-gradient-to-b from-primary to-primary/30 rounded-full mr-2 sm:mr-3"></div>
                         Summary Overview
                       </motion.h2>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {metrics.map((metric) => (
                           <motion.div
                             key={metric.title}
@@ -281,9 +282,9 @@ const Index = () => {
                     >
                       <motion.h2 
                         variants={itemVariants}
-                        className="text-xl font-semibold text-gray-800 mb-4 flex items-center"
+                        className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center"
                       >
-                        <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-blue-300 rounded-full mr-3"></div>
+                        <div className="w-1.5 sm:w-2 h-6 sm:h-8 bg-gradient-to-b from-blue-500 to-blue-300 rounded-full mr-2 sm:mr-3"></div>
                         Transaction Analysis
                       </motion.h2>
                       <TransactionDashboard />
@@ -298,9 +299,9 @@ const Index = () => {
                     >
                       <motion.h2 
                         variants={itemVariants}
-                        className="text-xl font-semibold text-gray-800 mb-4 flex items-center"
+                        className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center"
                       >
-                        <div className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-indigo-300 rounded-full mr-3"></div>
+                        <div className="w-1.5 sm:w-2 h-6 sm:h-8 bg-gradient-to-b from-indigo-500 to-indigo-300 rounded-full mr-2 sm:mr-3"></div>
                         Financial Institutions
                       </motion.h2>
                       <FinancialInstitutions />
@@ -315,9 +316,9 @@ const Index = () => {
                     >
                       <motion.h2 
                         variants={itemVariants}
-                        className="text-xl font-semibold text-gray-800 mb-4 flex items-center"
+                        className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center"
                       >
-                        <div className="w-2 h-8 bg-gradient-to-b from-amber-500 to-amber-300 rounded-full mr-3"></div>
+                        <div className="w-1.5 sm:w-2 h-6 sm:h-8 bg-gradient-to-b from-amber-500 to-amber-300 rounded-full mr-2 sm:mr-3"></div>
                         Lifestyle Analysis
                       </motion.h2>
                       <LifestyleDashboard />
@@ -332,9 +333,9 @@ const Index = () => {
                     >
                       <motion.h2 
                         variants={itemVariants}
-                        className="text-xl font-semibold text-gray-800 mb-4 flex items-center"
+                        className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center"
                       >
-                        <div className="w-2 h-8 bg-gradient-to-b from-violet-500 to-violet-300 rounded-full mr-3"></div>
+                        <div className="w-1.5 sm:w-2 h-6 sm:h-8 bg-gradient-to-b from-violet-500 to-violet-300 rounded-full mr-2 sm:mr-3"></div>
                         Utility Management
                       </motion.h2>
                       <Utility />

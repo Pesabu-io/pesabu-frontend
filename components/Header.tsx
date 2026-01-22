@@ -21,13 +21,20 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { Menu } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+function Header({ onMenuClick }: HeaderProps) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { user, logout } = useAuth();
   const router = useRouter();
   const profileRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const toggleProfileMenu = () => {
     setIsProfileOpen(!isProfileOpen);
@@ -72,22 +79,33 @@ function Header() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgb(0,0,0)_1px,transparent_0)] [background-size:20px_20px]" />
       </div>
 
-      <div className="relative z-10 max-w-full px-6">
-        <div className="flex justify-between items-center h-20">
-          {/* Left side - Page title or breadcrumb can go here */}
-          <div className="flex items-center">
+      <div className="relative z-10 max-w-full px-4 sm:px-6">
+        <div className="flex justify-between items-center h-16 sm:h-20">
+          {/* Left side - Mobile menu button and page title */}
+          <div className="flex items-center gap-3">
+            {isMobile && onMenuClick && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onMenuClick}
+                className="p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100/60 transition-all duration-200"
+                aria-label="Open menu"
+              >
+                <Menu size={20} />
+              </motion.button>
+            )}
             {/* Reserved for page title or breadcrumbs */}
           </div>
 
           {/* Right side - Search, Notifications, Messages, Profile */}
-          <div className="flex items-center gap-3">
-            {/* Search Bar */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Search Bar - Hidden on mobile, show on tablet+ */}
             <motion.div
               initial={false}
               animate={{
                 width: isSearchFocused ? 280 : 240,
               }}
-              className="hidden lg:flex items-center relative"
+              className="hidden md:flex items-center relative"
             >
               <div className={cn(
                 "absolute inset-0 rounded-xl transition-all duration-200",
@@ -126,7 +144,8 @@ function Header() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="relative p-2.5 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100/60 transition-all duration-200 group"
+              className="relative p-2 sm:p-2.5 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100/60 transition-all duration-200 group"
+              aria-label="Notifications"
             >
               <Bell size={18} className="transition-transform group-hover:scale-110" />
               <motion.span
@@ -136,17 +155,18 @@ function Header() {
               />
             </motion.button>
             
-            {/* Messages Button */}
+            {/* Messages Button - Hidden on mobile */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="relative p-2.5 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100/60 transition-all duration-200 group"
+              className="hidden sm:flex relative p-2 sm:p-2.5 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100/60 transition-all duration-200 group"
+              aria-label="Messages"
             >
               <MessageSquare size={18} className="transition-transform group-hover:scale-110" />
             </motion.button>
 
-            {/* Divider */}
-            <div className="h-8 w-px bg-gray-200/60 mx-1" />
+            {/* Divider - Hidden on mobile */}
+            <div className="hidden sm:block h-8 w-px bg-gray-200/60 mx-1" />
 
             {/* Profile Dropdown */}
             <div className="relative" ref={profileRef}>
@@ -154,18 +174,18 @@ function Header() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={toggleProfileMenu}
-                className="flex items-center gap-3 cursor-pointer rounded-xl hover:bg-gray-100/60 p-2 transition-all duration-200 group"
+                className="flex items-center gap-2 sm:gap-3 cursor-pointer rounded-xl hover:bg-gray-100/60 p-1.5 sm:p-2 transition-all duration-200 group"
               >
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-pesabu-teal to-pesabu-teal/80 rounded-xl blur-md opacity-30 group-hover:opacity-50 transition-opacity" />
-                  <Avatar className="relative h-10 w-10 ring-2 ring-white shadow-md">
+                  <Avatar className="relative h-8 w-8 sm:h-10 sm:w-10 ring-2 ring-white shadow-md">
                     <AvatarImage src="/api/placeholder/32/32" alt={user?.username || "User"} />
-                    <AvatarFallback className="bg-gradient-to-br from-pesabu-teal via-pesabu-teal/90 to-pesabu-teal/80 text-white font-semibold text-sm">
+                    <AvatarFallback className="bg-gradient-to-br from-pesabu-teal via-pesabu-teal/90 to-pesabu-teal/80 text-white font-semibold text-xs sm:text-sm">
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
                 </div>
-                <div className="hidden md:block text-left">
+                <div className="hidden lg:block text-left">
                   <p className="text-sm font-semibold text-gray-900 leading-tight">
                     {user?.username || "User"}
                   </p>

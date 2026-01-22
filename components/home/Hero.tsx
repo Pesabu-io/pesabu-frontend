@@ -48,8 +48,8 @@ const Hero = () => {
         </svg>
       </div>
 
-      <div className="container mx-auto px-6 py-12 relative z-10">
-        <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-10">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10">
+        <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-6 sm:gap-8 md:gap-10">
           <motion.div 
             className="md:w-1/2"
             initial={{ opacity: 0, x: -30 }}
@@ -66,7 +66,7 @@ const Hero = () => {
             </motion.div>
             
             <motion.h1 
-              className="font-miniver text-pesabu-gold text-4xl md:text-5xl lg:text-6xl mb-4"
+              className="font-miniver text-pesabu-gold text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-3 sm:mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -75,7 +75,7 @@ const Hero = () => {
             </motion.h1>
             
             <motion.h2 
-              className="text-pesabu-teal text-xl md:text-2xl lg:text-3xl font-semibold md:max-w-xl mb-6"
+              className="text-pesabu-teal text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold md:max-w-xl mb-4 sm:mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -84,7 +84,7 @@ const Hero = () => {
             </motion.h2>
             
             <motion.p
-              className="text-gray-600 md:max-w-xl mb-8 text-lg"
+              className="text-gray-600 md:max-w-xl mb-6 sm:mb-8 text-base sm:text-lg"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
               transition={{ duration: 0.6, delay: 0.5 }}
@@ -112,13 +112,13 @@ const Hero = () => {
             </motion.div>
             
             <motion.div 
-              className="flex flex-wrap gap-4 mt-8"
+              className="flex flex-wrap gap-3 sm:gap-4 mt-6 sm:mt-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
               transition={{ duration: 0.6, delay: 0.7 }}
             >
               <Button 
-                className="bg-pesabu-gold hover:bg-pesabu-gold/90 text-white rounded-full transition-all duration-300 px-8 py-6 text-lg group relative overflow-hidden"
+                className="bg-pesabu-gold hover:bg-pesabu-gold/90 text-white rounded-full transition-all duration-300 px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg group relative overflow-hidden"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   Book Demo
@@ -127,14 +127,14 @@ const Hero = () => {
                     whileHover={{ x: 5 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <ChevronRight size={20} />
+                    <ChevronRight size={18} className="sm:w-5 sm:h-5" />
                   </motion.div>
                 </span>
                 <span className="absolute inset-0 bg-gradient-to-r from-pesabu-gold to-pesabu-gold/80 transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
               </Button>
               <Button 
                 variant="outline" 
-                className="border-2 border-pesabu-teal text-pesabu-teal hover:bg-pesabu-teal hover:text-white rounded-full transition-all duration-300 px-8 py-6 text-lg"
+                className="border-2 border-pesabu-teal text-pesabu-teal hover:bg-pesabu-teal hover:text-white rounded-full transition-all duration-300 px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg"
               >
                 Sign in
               </Button>
