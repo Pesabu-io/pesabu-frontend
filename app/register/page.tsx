@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { FiUser, FiMail, FiLock, FiArrowRight, FiCheck } from "react-icons/fi";
+import { FiUser, FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function RegistrationForm() {
@@ -23,8 +23,8 @@ export default function RegistrationForm() {
     try {
       await signup({ username, email, password });
       router.replace("/pinsights");
-    } catch (err: any) {
-      setError(err.message || "Failed to register. Please try again.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to register. Please try again.");
     } finally {
       setLoading(false);
     }

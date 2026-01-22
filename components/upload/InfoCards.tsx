@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Lock, CheckCircle2, TrendingUp, Shield, Sparkles } from 'lucide-react';
+import { FileText, Lock, TrendingUp } from 'lucide-react';
 
 const cardData = [
   {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -57,7 +57,7 @@ const TransactionDashboard = () => {
     }
   };
 
-  const sortData = <T extends Record<string, string | number | undefined>>(data: T[], field: SortField): T[] => {
+  const sortData = useCallback(<T extends Record<string, string | number | undefined>>(data: T[], field: SortField): T[] => {
     if (!data || data.length === 0) return data;
     
     const sorted = [...data].sort((a, b) => {
@@ -101,7 +101,7 @@ const TransactionDashboard = () => {
     });
 
     return sorted;
-  };
+  }, [sortDirection]);
 
   // Sort icon component
   const SortIcon = ({ field }: { field: SortField }) => {
@@ -116,32 +116,32 @@ const TransactionDashboard = () => {
   // Sorted data for each tab
   const sortedPaybill = useMemo(() => 
     sortData(detailedTransactions?.topPaybill || [], sortField),
-    [detailedTransactions?.topPaybill, sortField, sortDirection]
+    [detailedTransactions?.topPaybill, sortField, sortData]
   );
   
   const sortedTill = useMemo(() => 
     sortData(detailedTransactions?.topTill || [], sortField),
-    [detailedTransactions?.topTill, sortField, sortDirection]
+    [detailedTransactions?.topTill, sortField, sortData]
   );
   
   const sortedSendMoney = useMemo(() => 
     sortData(detailedTransactions?.topSendMoney || [], sortField),
-    [detailedTransactions?.topSendMoney, sortField, sortDirection]
+    [detailedTransactions?.topSendMoney, sortField, sortData]
   );
   
   const sortedCustomer = useMemo(() => 
     sortData(detailedTransactions?.topCustomer || [], sortField),
-    [detailedTransactions?.topCustomer, sortField, sortDirection]
+    [detailedTransactions?.topCustomer, sortField, sortData]
   );
   
   const sortedWithdrawals = useMemo(() => 
     sortData(detailedTransactions?.topWithdrawals || [], sortField),
-    [detailedTransactions?.topWithdrawals, sortField, sortDirection]
+    [detailedTransactions?.topWithdrawals, sortField, sortData]
   );
   
   const sortedReceived = useMemo(() => 
     sortData(detailedTransactions?.topReceived || [], sortField),
-    [detailedTransactions?.topReceived, sortField, sortDirection]
+    [detailedTransactions?.topReceived, sortField, sortData]
   );
 
   if (transTypes.isLoading || summary.isLoading) {

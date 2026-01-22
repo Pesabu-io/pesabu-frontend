@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Upload, FileText, CheckCircle2, X } from 'lucide-react';
+import { Upload, CheckCircle2, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatFileSize } from '@/lib/utils';
 import { cn } from '@/lib/utils';

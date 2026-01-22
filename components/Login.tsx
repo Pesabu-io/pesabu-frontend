@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { FiUser, FiLock, FiArrowRight, FiMail } from "react-icons/fi";
+import { FiUser, FiLock, FiArrowRight } from "react-icons/fi";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginForm() {
@@ -22,8 +22,8 @@ export default function LoginForm() {
     try {
       await login({ username, password });
       router.replace("/pinsights");
-    } catch (err: any) {
-      setError(err.message || "Failed to login. Please check your credentials.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to login. Please check your credentials.");
     } finally {
       setLoading(false);
     }

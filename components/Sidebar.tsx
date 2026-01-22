@@ -14,7 +14,6 @@ import {
   LogOut,
   Sparkles,
   Crown,
-  User,
   Mail
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,17 +28,17 @@ const Sidebar: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const sidebarLinks = [
+  const sidebarLinks = useMemo(() => [
     { icon: Home, text: "Home", href: "/", badge: null },
     { icon: PieChart, text: "P-insights", href: "/pinsights", badge: null },
     { icon: Coins, text: "Loans", href: "/loans", badge: null },
     { icon: Brain, text: "Credit Score", href: "/credit-score", badge: "Pro" },
-  ];
+  ], []);
 
-  const footerLinks = [
+  const footerLinks = useMemo(() => [
     { icon: Settings, text: "Settings", href: "/settings" },
     { icon: Receipt, text: "Billing", href: "/billing" },
-  ];
+  ], []);
 
   const handleLogout = () => {
     logout();
@@ -48,13 +47,16 @@ const Sidebar: React.FC = () => {
 
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
     const currentIndex = sidebarLinks.findIndex(
       (link) => pathname === link.href || pathname?.startsWith(link.href + "/")
     );
     if (currentIndex !== -1) {
       setActiveIndex(currentIndex);
     }
-  }, [pathname]);
+  }, [pathname, sidebarLinks]);
 
   if (!isMounted) {
     return <SidebarSkeleton />;

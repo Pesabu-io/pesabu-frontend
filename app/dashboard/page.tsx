@@ -4,6 +4,7 @@ import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
+import Image from "next/image";
 
 const Index = () => {
   const { user } = useAuth();
@@ -22,9 +23,11 @@ const Index = () => {
               </div>
 
               <div className="flex justify-end mb-12">
-                <img
+                <Image
                   src="/lovable-uploads/62091416-32c4-49fb-af5e-73c65d9efa05.png"
                   alt="Illustration"
+                  width={256}
+                  height={256}
                   className="w-64"
                 />
               </div>
