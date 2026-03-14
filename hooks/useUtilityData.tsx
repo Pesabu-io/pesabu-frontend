@@ -43,6 +43,10 @@ interface UtilityDataState {
   lastUpdated: Date | null;
 }
 
+const asArray = <T>(value: unknown): T[] => {
+  return Array.isArray(value) ? (value as T[]) : [];
+};
+
 export const useUtilityData = () => {
   // Initialize state with structured data
   const [state, setState] = useState<UtilityDataState>({
@@ -105,7 +109,18 @@ export const useUtilityData = () => {
     console.log("Fetching utility data...");
     setState(prev => ({ ...prev, isLoading: true }));
     
-    const results: Partial<UtilityData> = {};
+    const results: Partial<UtilityData> = {
+      bills: [],
+      kplcTransactions: [],
+      kplcMetrics: null,
+      safaricomWifi: [],
+      safaricomWifiMetrics: null,
+      zukuWifi: [],
+      zukuWifiMetrics: null,
+      fuel: [],
+      fuelMetrics: null,
+      chartData: [],
+    };
     let hasError = false;
     let errorMessage = '';
     
@@ -123,14 +138,14 @@ export const useUtilityData = () => {
     
     try {
       // Fetch data from all endpoints
-      results.bills = await safelyFetchData(endpoints.bills, []);
-      results.kplcTransactions = await safelyFetchData(endpoints.kplc, []);
+      results.bills = asArray<UtilityTransaction>(await safelyFetchData(endpoints.bills, []));
+      results.kplcTransactions = asArray<UtilityTransaction>(await safelyFetchData(endpoints.kplc, []));
       results.kplcMetrics = await safelyFetchData(endpoints.kplcMetrics, null);
-      results.safaricomWifi = await safelyFetchData(endpoints.safaricomWifi, []);
+      results.safaricomWifi = asArray<UtilityTransaction>(await safelyFetchData(endpoints.safaricomWifi, []));
       results.safaricomWifiMetrics = await safelyFetchData(endpoints.safaricomWifiMetrics, null);
-      results.zukuWifi = await safelyFetchData(endpoints.zukuWifi, []);
+      results.zukuWifi = asArray<UtilityTransaction>(await safelyFetchData(endpoints.zukuWifi, []));
       results.zukuWifiMetrics = await safelyFetchData(endpoints.zukuWifiMetrics, null);
-      results.fuel = await safelyFetchData(endpoints.fuel, []);
+      results.fuel = asArray<UtilityTransaction>(await safelyFetchData(endpoints.fuel, []));
       results.fuelMetrics = await safelyFetchData(endpoints.fuelMetrics, null);
       
     } catch (error) {
@@ -148,8 +163,9 @@ export const useUtilityData = () => {
     }
     
     // Transform KPLC data for the chart if available
-    const chartData = results.kplcTransactions && results.kplcTransactions.length > 0
-      ? results.kplcTransactions
+    const kplcTransactions = asArray<UtilityTransaction>(results.kplcTransactions);
+    const chartData = kplcTransactions.length > 0
+      ? kplcTransactions
           .reduce((acc: any[], item: UtilityTransaction) => {
             // Group by month for chart
             const existingMonth = acc.find(x => x.month === item.month_name);

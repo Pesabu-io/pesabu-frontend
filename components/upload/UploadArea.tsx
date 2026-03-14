@@ -19,6 +19,7 @@ interface UploadAreaProps {
   setSelectedFile: React.Dispatch<React.SetStateAction<FileState>>;
   dragActive: boolean;
   setDragActive: React.Dispatch<React.SetStateAction<boolean>>;
+  providerLabel: string;
 }
 
 const UploadArea: React.FC<UploadAreaProps> = ({
@@ -26,6 +27,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   setSelectedFile,
   dragActive,
   setDragActive,
+  providerLabel,
 }) => {
   const { toast } = useToast();
 
@@ -163,7 +165,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
               </div>
             </div>
             <p className="text-2xl font-bold text-gray-900 mb-2">
-              Drag & Drop your M-PESA statement
+              Drag & Drop your {providerLabel} statement
             </p>
             <p className="text-gray-600 text-sm font-medium">
               or <span className="text-pesabu-teal font-semibold">click to browse</span> your files

@@ -89,7 +89,7 @@ const PInsights = () => {
                 >
                   Unlock the Power of Your
                   <span className="block bg-gradient-to-r from-pesabu-teal to-pesabu-teal/80 bg-clip-text text-transparent">
-                    M-Pesa Statements
+                    Mobile Money Statements
                   </span>
                 </motion.h1>
                 
@@ -100,7 +100,7 @@ const PInsights = () => {
                   animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                  Discover powerful insights from your M-Pesa transactions. Our advanced AI-powered analysis 
+                  Discover powerful insights from your mobile money transactions. Our advanced AI-powered analysis 
                   helps you understand spending patterns, identify savings opportunities, and make smarter 
                   financial decisions.
                 </motion.p>
@@ -197,7 +197,7 @@ const PInsights = () => {
                         </div>
                         <div className="text-left">
                           <div className="text-base sm:text-lg md:text-xl font-bold">Start Analysis</div>
-                          <div className="text-xs sm:text-sm opacity-90">Upload your M-Pesa statement</div>
+                          <div className="text-xs sm:text-sm opacity-90">Upload your mobile money statement</div>
                         </div>
                         <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform" />
                       </div>

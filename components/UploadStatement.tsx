@@ -18,6 +18,24 @@ import {
 import { motion } from "framer-motion";
 import { server } from "@/utils/util";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const PROVIDER_OPTIONS = [
+  { value: "mpesa", label: "Safaricom" },
+  { value: "airtel_money", label: "Airtel Money" },
+  { value: "tkash", label: "T-Kash" },
+];
+
+const isPasswordError = (message: string) => {
+  const normalized = message.toLowerCase();
+  return normalized.includes("failed to decrypt pdf") || normalized.includes("password");
+};
 
 const UploadStatement = () => {
   const [selectedFile, setSelectedFile] = useState<FileState>(null);
@@ -27,6 +45,7 @@ const UploadStatement = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [processingStage, setProcessingStage] = useState<string>("");
+  const [selectedProvider, setSelectedProvider] = useState<string>("mpesa");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -38,7 +57,86 @@ const UploadStatement = () => {
     };
   }, []);
 
-  const handleSubmit = () => {
+  const uploadStatement = async (password: string) => {
+    if (!selectedFile) {
+      throw new Error("No file selected. Please select a file again.");
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile.file);
+    formData.append("password", password);
+    formData.append("provider", selectedProvider);
+
+    console.log("Attempting to upload file...");
+    const uploadResponse = await fetch(`${server}/file/uploadfileandclean/`, {
+      method: "POST",
+      body: formData,
+      mode: "cors",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    console.log("Upload response received:", uploadResponse.status);
+
+    if (!uploadResponse.ok) {
+      let errorMessage = "Upload failed";
+      try {
+        const errorData = await uploadResponse.json();
+        if (typeof errorData?.detail === "string") {
+          errorMessage = errorData.detail;
+        } else if (typeof errorData?.detail?.error === "string") {
+          errorMessage = errorData.detail.error;
+        }
+      } catch {
+        // fall back to default message
+      }
+      throw new Error(errorMessage);
+    }
+
+    const responseData = await uploadResponse.json();
+    console.log("Upload response data:", responseData);
+
+    return responseData;
+  };
+
+  const finalizeSuccessfulUpload = async (responseData: {
+    client_name?: string;
+    mobile_number?: string;
+    dataframe?: unknown[];
+    provider?: string;
+    provider_id?: string;
+  }) => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+
+    setUploadProgress(100);
+    setProcessingStage("Processing complete!");
+
+    await new Promise(resolve => setTimeout(resolve, 1200));
+
+    toast({
+      title: "Success",
+      description: "Statement uploaded and processed successfully",
+    });
+
+    const { client_name, mobile_number, dataframe, provider, provider_id } = responseData;
+
+    if (client_name) localStorage.setItem("statementClientName", client_name);
+    if (mobile_number) localStorage.setItem("statementMobileNumber", mobile_number);
+    if (dataframe) localStorage.setItem("statementData", JSON.stringify(dataframe));
+    if (provider) localStorage.setItem("statementProviderName", provider);
+    if (provider_id) localStorage.setItem("statementProviderId", provider_id);
+
+    setIsVerificationOpen(false);
+    setVerificationCode("");
+    setIsUploading(false);
+    router.push("/insights");
+  };
+
+  const handleSubmit = async () => {
     if (!selectedFile) {
       toast({
         variant: "destructive",
@@ -47,7 +145,46 @@ const UploadStatement = () => {
       });
       return;
     }
-    setIsVerificationOpen(true);
+
+    setIsUploading(true);
+    setUploadProgress(0);
+    setProcessingStage("Uploading file...");
+
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+
+    try {
+      simulateProgress();
+      setProcessingStage("Checking file security...");
+      const responseData = await uploadStatement("");
+      await finalizeSuccessfulUpload(responseData);
+    } catch (error) {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+
+      const message = error instanceof Error ? error.message : "An unknown error occurred";
+      if (isPasswordError(message)) {
+        setIsUploading(false);
+        setUploadProgress(0);
+        setProcessingStage("");
+        setIsVerificationOpen(true);
+        toast({
+          title: "Password Required",
+          description: "This statement is password-protected. Enter the PDF password to continue.",
+        });
+        return;
+      }
+
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: message,
+      });
+      setIsUploading(false);
+      setUploadProgress(0);
+      setProcessingStage("");
+    }
   };
 
   const simulateProgress = () => {
@@ -64,11 +201,11 @@ const UploadStatement = () => {
   };
 
   const handleVerification = async () => {
-    if (verificationCode.length !== 6) {
+    if (verificationCode.trim().length === 0) {
       toast({
         variant: "destructive",
-        title: "Invalid code",
-        description: "Please enter a 6-digit verification code",
+        title: "Missing password",
+        description: "Please enter your statement PDF password",
       });
       return;
     }
@@ -87,60 +224,13 @@ const UploadStatement = () => {
     setUploadProgress(0);
     setProcessingStage("Uploading file...");
 
-    const formData = new FormData();
-    formData.append("file", selectedFile.file);
-    formData.append("password", verificationCode);
-
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
 
     try {
-      console.log("Attempting to upload file...");
       simulateProgress();
       setProcessingStage("Processing your statement...");
-
-      const uploadResponse = await fetch(`${server}/file/uploadfileandclean/`, {
-        method: "POST",
-        body: formData,
-        mode: 'cors',
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-
-      console.log("Upload response received:", uploadResponse.status);
-
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        throw new Error(errorData.detail || "Upload failed");
-      }
-
-      const responseData = await uploadResponse.json();
-      console.log("Upload response data:", responseData);
-
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-
-      setUploadProgress(100);
-      setProcessingStage("Processing complete!");
-
-      await new Promise(resolve => setTimeout(resolve, 1200));
-
-      toast({
-        title: "Success",
-        description: "Statement uploaded and processed successfully",
-      });
-
-      const { client_name, mobile_number, dataframe } = responseData;
-
-      if (client_name) localStorage.setItem('statementClientName', client_name);
-      if (mobile_number) localStorage.setItem('statementMobileNumber', mobile_number);
-      if (dataframe) localStorage.setItem('statementData', JSON.stringify(dataframe));
-
-      setIsVerificationOpen(false);
-      setIsUploading(false);
-      router.push("/insights");
+      const responseData = await uploadStatement(verificationCode);
+      await finalizeSuccessfulUpload(responseData);
 
     } catch (error) {
       console.error("Upload error:", error);
@@ -197,7 +287,11 @@ const UploadStatement = () => {
               transition={{ duration: 0.6 }}
               className="max-w-4xl mx-auto"
             >
-              <UploadHeader />
+              <UploadHeader
+                providerLabel={
+                  PROVIDER_OPTIONS.find((option) => option.value === selectedProvider)?.label || "Safaricom"
+                }
+              />
 
               {/* Main upload card */}
               <motion.div
@@ -216,11 +310,33 @@ const UploadStatement = () => {
                   </div>
 
                   <div className="p-4 sm:p-6 md:p-8 lg:p-12">
+                    <div className="mb-5 sm:mb-6 md:mb-8">
+                      <p className="mb-2 text-sm font-semibold text-gray-700">Mobile Money Provider</p>
+                      <Select value={selectedProvider} onValueChange={setSelectedProvider}>
+                        <SelectTrigger className="h-11 rounded-xl border-gray-300 bg-white">
+                          <SelectValue placeholder="Select provider" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROVIDER_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="mt-2 text-xs text-gray-500">
+                        Choose the provider that matches your uploaded statement.
+                      </p>
+                    </div>
+
                     <UploadArea
                       selectedFile={selectedFile}
                       setSelectedFile={setSelectedFile}
                       dragActive={dragActive}
                       setDragActive={setDragActive}
+                      providerLabel={
+                        PROVIDER_OPTIONS.find((option) => option.value === selectedProvider)?.label || "Safaricom"
+                      }
                     />
 
                     {/* Security note */}
@@ -281,6 +397,9 @@ const UploadStatement = () => {
               uploadProgress={uploadProgress}
               processingStage={processingStage}
               verificationCode={verificationCode}
+              providerLabel={
+                PROVIDER_OPTIONS.find((option) => option.value === selectedProvider)?.label || "Safaricom"
+              }
               setVerificationCode={setVerificationCode}
               handleVerification={handleVerification}
             />

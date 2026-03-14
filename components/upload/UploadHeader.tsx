@@ -4,7 +4,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FileText } from 'lucide-react';
 
-const UploadHeader = () => {
+interface UploadHeaderProps {
+  providerLabel: string;
+}
+
+const UploadHeader: React.FC<UploadHeaderProps> = ({ providerLabel }) => {
   return (
     <div className="mb-10">
       <motion.div
@@ -23,7 +27,7 @@ const UploadHeader = () => {
         transition={{ delay: 0.2, duration: 0.5 }}
         className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent"
       >
-        Upload Your M-PESA Statement
+        Upload Your {providerLabel} Statement
       </motion.h1>
       
       <motion.p
@@ -32,7 +36,7 @@ const UploadHeader = () => {
         transition={{ delay: 0.3, duration: 0.5 }}
         className="text-gray-600 text-lg leading-relaxed max-w-2xl"
       >
-        Get personalized financial insights by uploading your M-PESA statement. 
+        Get personalized financial insights by uploading your {providerLabel} statement. 
         Our AI-powered analysis will help you understand your spending patterns and make smarter financial decisions.
       </motion.p>
     </div>

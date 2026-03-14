@@ -13,7 +13,7 @@ import {
   } from "lucide-react";
   
 
-  export const server = 'http://51.11.182.211:8000';
+  export const server = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   
   export const mainMenuItems = [
     { name: "Home", icon: HomeIcon, href: "/", color: "text-blue-500" },

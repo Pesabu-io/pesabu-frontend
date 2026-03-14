@@ -4,23 +4,20 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, Lock, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from '@/components/ui/input-otp';
 
 interface VerificationDialogContentProps {
   isUploading: boolean;
   uploadProgress: number;
   processingStage: string;
   verificationCode: string;
+  providerLabel: string;
   setVerificationCode: (code: string) => void;
   handleVerification: () => void;
 }
@@ -30,6 +27,7 @@ const VerificationDialogContent: React.FC<VerificationDialogContentProps> = ({
   uploadProgress,
   processingStage,
   verificationCode,
+  providerLabel,
   setVerificationCode,
   handleVerification,
 }) => {
@@ -48,7 +46,7 @@ const VerificationDialogContent: React.FC<VerificationDialogContentProps> = ({
           Statement Password
         </DialogTitle>
         <DialogDescription className="text-center text-gray-600">
-          Enter the 6-digit password provided with your M-PESA statement PDF
+          This file appears to be password-protected. Enter the password for your {providerLabel} statement PDF.
         </DialogDescription>
       </DialogHeader>
       
@@ -83,25 +81,22 @@ const VerificationDialogContent: React.FC<VerificationDialogContentProps> = ({
         </div>
       ) : (
         <div className="flex flex-col items-center space-y-8 py-4">
-          <InputOTP
-            maxLength={6}
+          <Input
+            type="password"
             value={verificationCode}
-            onChange={setVerificationCode}
-            className="gap-3"
-          >
-            <InputOTPGroup>
-              <InputOTPSlot index={0} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
-              <InputOTPSlot index={1} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
-              <InputOTPSlot index={2} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
-              <InputOTPSlot index={3} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
-              <InputOTPSlot index={4} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
-              <InputOTPSlot index={5} className="rounded-xl h-16 w-16 text-2xl font-bold border-2 border-gray-200 hover:border-pesabu-teal/50 focus:border-pesabu-teal transition-colors" />
-            </InputOTPGroup>
-          </InputOTP>
+            onChange={(e) => setVerificationCode(e.target.value)}
+            placeholder="Enter statement PDF password"
+            className="h-12 rounded-xl border-2 border-gray-200 px-4 text-base"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleVerification();
+              }
+            }}
+          />
           
           <Button
             onClick={handleVerification}
-            disabled={verificationCode.length !== 6}
+            disabled={verificationCode.trim().length === 0}
             className="w-full relative group overflow-hidden bg-gradient-to-r from-pesabu-teal via-pesabu-teal/95 to-pesabu-teal hover:from-pesabu-teal/90 hover:via-pesabu-teal hover:to-pesabu-teal/90 text-white py-6 h-auto text-lg rounded-2xl font-semibold shadow-xl shadow-pesabu-teal/30 hover:shadow-2xl hover:shadow-pesabu-teal/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-pesabu-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

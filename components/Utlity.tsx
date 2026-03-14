@@ -59,25 +59,30 @@ const UtilityDashboard = () => {
     { name: 'Fuel', value: data?.fuelMetrics?.total_tranasacted_amount || 0, color: '#ef4444' }
   ];
 
+  const kplcTransactions = Array.isArray(data?.kplcTransactions) ? data.kplcTransactions : [];
+  const safaricomWifiTransactions = Array.isArray(data?.safaricomWifi) ? data.safaricomWifi : [];
+  const zukuWifiTransactions = Array.isArray(data?.zukuWifi) ? data.zukuWifi : [];
+  const fuelTransactions = Array.isArray(data?.fuel) ? data.fuel : [];
+
   // Convert monthly data for comparison chart
   const getMonthlyComparisonData = () => {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 
                     'July', 'August', 'September', 'October', 'November', 'December'];
     
     return months.map(month => {
-      const kplcAmount = (data?.kplcTransactions || [])
+      const kplcAmount = kplcTransactions
         .filter(t => t.month_name === month)
         .reduce((sum, t) => sum + t.amount, 0);
       
-      const safaricomAmount = (data?.safaricomWifi || [])
+      const safaricomAmount = safaricomWifiTransactions
         .filter(t => t.month_name === month)
         .reduce((sum, t) => sum + t.amount, 0);
       
-      const zukuAmount = (data?.zukuWifi || [])
+      const zukuAmount = zukuWifiTransactions
         .filter(t => t.month_name === month)
         .reduce((sum, t) => sum + t.amount, 0);
       
-      const fuelAmount = (data?.fuel || [])
+      const fuelAmount = fuelTransactions
         .filter(t => t.month_name === month)
         .reduce((sum, t) => sum + t.amount, 0);
       
@@ -310,7 +315,7 @@ const UtilityDashboard = () => {
 
             {/* KPLC Transactions */}
             <TabsContent value="kplc">
-              {data?.kplcTransactions && data.kplcTransactions.length > 0 ? (
+              {kplcTransactions.length > 0 ? (
                 <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -322,7 +327,7 @@ const UtilityDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.kplcTransactions.slice(0, 5).map((transaction) => (
+                      {kplcTransactions.slice(0, 5).map((transaction) => (
                         <TableRow key={transaction["Receipt No."]}>
                           <TableCell className="font-medium text-xs sm:text-sm">
                             {transaction["Receipt No."]}
@@ -344,7 +349,7 @@ const UtilityDashboard = () => {
 
             {/* Safaricom WiFi Transactions */}
             <TabsContent value="safaricom">
-              {data?.safaricomWifi && data.safaricomWifi.length > 0 ? (
+              {safaricomWifiTransactions.length > 0 ? (
                 <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -356,7 +361,7 @@ const UtilityDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.safaricomWifi.slice(0, 5).map((transaction) => (
+                      {safaricomWifiTransactions.slice(0, 5).map((transaction) => (
                         <TableRow key={transaction["Receipt No."]}>
                           <TableCell className="font-medium text-xs sm:text-sm">
                             {transaction["Receipt No."]}
@@ -378,7 +383,7 @@ const UtilityDashboard = () => {
 
             {/* Zuku WiFi Transactions */}
             <TabsContent value="zuku">
-              {data?.zukuWifi && data.zukuWifi.length > 0 ? (
+              {zukuWifiTransactions.length > 0 ? (
                 <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -390,7 +395,7 @@ const UtilityDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.zukuWifi.slice(0, 5).map((transaction) => (
+                      {zukuWifiTransactions.slice(0, 5).map((transaction) => (
                         <TableRow key={transaction["Receipt No."]}>
                           <TableCell className="font-medium text-xs sm:text-sm">
                             {transaction["Receipt No."]}
@@ -412,7 +417,7 @@ const UtilityDashboard = () => {
 
             {/* Fuel Transactions */}
             <TabsContent value="fuel">
-              {data?.fuel && data.fuel.length > 0 ? (
+              {fuelTransactions.length > 0 ? (
                 <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -424,7 +429,7 @@ const UtilityDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.fuel.slice(0, 5).map((transaction) => (
+                      {fuelTransactions.slice(0, 5).map((transaction) => (
                         <TableRow key={transaction["Receipt No."]}>
                           <TableCell className="font-medium text-xs sm:text-sm">
                             {transaction["Receipt No."]}
@@ -501,8 +506,8 @@ const UtilityDashboard = () => {
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Last payment: {data?.safaricomWifi && data.safaricomWifi.length > 0 ? 
-                    new Date(data.safaricomWifi[0]["Completion Time"]).toLocaleDateString() : 
+                  Last payment: {safaricomWifiTransactions.length > 0 ? 
+                    new Date(safaricomWifiTransactions[0]["Completion Time"]).toLocaleDateString() : 
                     "N/A"}
                 </p>
               </div>
@@ -514,12 +519,12 @@ const UtilityDashboard = () => {
                     Zuku WiFi
                   </h3>
                   <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
-                    {data?.zukuWifi && data.zukuWifi.length > 0 ? "Active" : "Status Unknown"}
+                    {zukuWifiTransactions.length > 0 ? "Active" : "Status Unknown"}
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Last payment: {data?.zukuWifi && data.zukuWifi.length > 0 ? 
-                    new Date(data.zukuWifi[0]["Completion Time"]).toLocaleDateString() : 
+                  Last payment: {zukuWifiTransactions.length > 0 ? 
+                    new Date(zukuWifiTransactions[0]["Completion Time"]).toLocaleDateString() : 
                     "N/A"}
                 </p>
               </div>
@@ -531,8 +536,8 @@ const UtilityDashboard = () => {
                     Fuel Status
                   </h3>
                   <Badge variant="outline" className="bg-slate-50 text-slate-700">
-                    {data?.fuel && data.fuel.length > 0 ? 
-                      `Last fueled: ${new Date(data.fuel[0]["Completion Time"]).toLocaleDateString()}` : 
+                    {fuelTransactions.length > 0 ? 
+                      `Last fueled: ${new Date(fuelTransactions[0]["Completion Time"]).toLocaleDateString()}` : 
                       "No recent transactions"}
                   </Badge>
                 </div>

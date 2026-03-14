@@ -351,7 +351,7 @@ const CreditScore = () => {
             <div className="text-sm text-muted-foreground">
               <p className="font-semibold mb-2">Important Disclaimer</p>
               <p>
-                This credit score is calculated based on your M-PESA transaction patterns and may not reflect 
+                This credit score is calculated based on your mobile money transaction patterns and may not reflect 
                 your complete credit profile. It&apos;s intended for informational purposes only and should not be 
                 used as the sole basis for financial decisions. For comprehensive credit assessment, 
                 consult with financial institutions or credit bureaus.

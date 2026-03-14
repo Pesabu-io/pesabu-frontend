@@ -91,12 +91,14 @@ const Index = () => {
     setNumber(mobileNumber)
   }, []);
 
+  const statementProviderName = typeof window !== 'undefined' ? localStorage.getItem('statementProviderName') : null;
+
   const documentInfo = {
     name: client,
     mobile: number,
     idNumber: "12345678",
     email: "john.doe@example.com",
-    documentType: "M-PESA Statement",
+    documentType: `${statementProviderName || "Mobile Money"} Statement`,
     period: "Jan 2025 - Feb 2025",
     status: "Verified" as DocumentStatus,
     dateUploaded: "March 5, 2025",
