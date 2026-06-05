@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import type { TransactionCategory } from '@/lib/transactionCategories';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -25,13 +27,32 @@ import { XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar, Responsive
 type SortField = 'names' | 'numbers' | 'transactions' | 'amount' | 'max_amount';
 type SortDirection = 'asc' | 'desc';
 
+interface TopTransactionRow {
+  names?: string;
+  numbers?: string;
+  'Receipt No.'?: number;
+  receipt_count?: number;
+  amount?: number;
+  max_amount?: number;
+}
+
 const TransactionDashboard = () => {
+  const router = useRouter();
   const { transTypes, summary, insights, detailedTransactions } = useTransactionData();
   const [ setTimeRange] = useState("30");
   const [chartView, setChartView] = useState("volume");
   const [activeDetailTab, setActiveDetailTab] = useState("paybill");
   const [sortField, setSortField] = useState<SortField>('transactions');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  const openPartnerDetail = (type: TransactionCategory, item: TopTransactionRow) => {
+    const params = new URLSearchParams({
+      type,
+      name: item.names || 'Unknown',
+      number: item.numbers || 'N/A',
+    });
+    router.push(`/insights/transactions/detail?${params.toString()}`);
+  };
 
   // Prepare hourly data from endpoint
   const hourlyChartData = detailedTransactions?.hourlyData?.map((item) => ({
@@ -460,7 +481,9 @@ const TransactionDashboard = () => {
       <Card>
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="text-base sm:text-lg font-medium">Top Transactions by Type</CardTitle>
-          <CardDescription className="text-xs sm:text-sm">Most frequent transaction partners and patterns</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
+            Most frequent transaction partners and patterns. Click a row to view individual transactions.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeDetailTab} onValueChange={setActiveDetailTab}>
@@ -519,7 +542,14 @@ const TransactionDashboard = () => {
                     </thead>
                     <tbody>
                       {sortedPaybill.map((item, index) => (
-                        <tr key={index} className="border-b hover:bg-gray-50">
+                        <tr
+                          key={index}
+                          className="border-b hover:bg-gray-50 cursor-pointer"
+                          onClick={() => openPartnerDetail('paybill', item)}
+                          onKeyDown={(e) => e.key === 'Enter' && openPartnerDetail('paybill', item)}
+                          tabIndex={0}
+                          role="button"
+                        >
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
                           <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item.receipt_count || item['Receipt No.'] || 0}</td>
@@ -580,7 +610,14 @@ const TransactionDashboard = () => {
                     </thead>
                     <tbody>
                       {sortedTill.map((item, index) => (
-                        <tr key={index} className="border-b hover:bg-gray-50">
+                        <tr
+                          key={index}
+                          className="border-b hover:bg-gray-50 cursor-pointer"
+                          onClick={() => openPartnerDetail('till', item)}
+                          onKeyDown={(e) => e.key === 'Enter' && openPartnerDetail('till', item)}
+                          tabIndex={0}
+                          role="button"
+                        >
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
                           <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item.receipt_count || item['Receipt No.'] || 0}</td>
@@ -641,7 +678,14 @@ const TransactionDashboard = () => {
                     </thead>
                     <tbody>
                       {sortedSendMoney.map((item, index) => (
-                        <tr key={index} className="border-b hover:bg-gray-50">
+                        <tr
+                          key={index}
+                          className="border-b hover:bg-gray-50 cursor-pointer"
+                          onClick={() => openPartnerDetail('sendmoney', item)}
+                          onKeyDown={(e) => e.key === 'Enter' && openPartnerDetail('sendmoney', item)}
+                          tabIndex={0}
+                          role="button"
+                        >
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
                           <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item.receipt_count || item['Receipt No.'] || 0}</td>
@@ -702,7 +746,14 @@ const TransactionDashboard = () => {
                     </thead>
                     <tbody>
                       {sortedCustomer.map((item, index) => (
-                        <tr key={index} className="border-b hover:bg-gray-50">
+                        <tr
+                          key={index}
+                          className="border-b hover:bg-gray-50 cursor-pointer"
+                          onClick={() => openPartnerDetail('customer', item)}
+                          onKeyDown={(e) => e.key === 'Enter' && openPartnerDetail('customer', item)}
+                          tabIndex={0}
+                          role="button"
+                        >
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
                           <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item['Receipt No.'] || item.receipt_count || 0}</td>
@@ -763,7 +814,14 @@ const TransactionDashboard = () => {
                     </thead>
                     <tbody>
                       {sortedWithdrawals.map((item, index) => (
-                        <tr key={index} className="border-b hover:bg-gray-50">
+                        <tr
+                          key={index}
+                          className="border-b hover:bg-gray-50 cursor-pointer"
+                          onClick={() => openPartnerDetail('withdrawals', item)}
+                          onKeyDown={(e) => e.key === 'Enter' && openPartnerDetail('withdrawals', item)}
+                          tabIndex={0}
+                          role="button"
+                        >
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
                           <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item['Receipt No.'] || item.receipt_count || 0}</td>
@@ -824,7 +882,14 @@ const TransactionDashboard = () => {
                     </thead>
                     <tbody>
                       {sortedReceived.map((item, index) => (
-                        <tr key={index} className="border-b hover:bg-gray-50">
+                        <tr
+                          key={index}
+                          className="border-b hover:bg-gray-50 cursor-pointer"
+                          onClick={() => openPartnerDetail('received', item)}
+                          onKeyDown={(e) => e.key === 'Enter' && openPartnerDetail('received', item)}
+                          tabIndex={0}
+                          role="button"
+                        >
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.names || 'Unknown'}</td>
                           <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.numbers || 'N/A'}</td>
                           <td className="text-right p-2 sm:p-3 text-xs sm:text-sm">{item['Receipt No.'] || item.receipt_count || 0}</td>
