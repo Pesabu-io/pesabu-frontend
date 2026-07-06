@@ -3,25 +3,24 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import SidebarSkeleton from "./SidebarSkeleton";
-import { Home, PieChart, Coins, Brain, Settings, Receipt, ChevronDown, ChevronRight } from "lucide-react";
+import { Home, PieChart, Coins, Brain, Settings, Receipt, ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
+
+const sidebarLinks = [
+  { icon: Home, text: "Home", href: "/", active: false },
+  { icon: PieChart, text: "P-insights", href: "/pinsights", active: false },
+  { icon: Coins, text: "Loan Management System", href: "/loans", active: false },
+  { icon: Brain, text: "Credit Scoring Engine", href: "/credit-score", active: false },
+];
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-
-  const sidebarLinks = [
-    { icon: Home, text: "Home", href: "/", active: false },
-    { icon: PieChart, text: "P-insights", href: "/pinsights", active: false },
-    { icon: Coins, text: "Loan Management System", href: "/loans", active: false },
-    { icon: Brain, text: "Credit Scoring Engine", href: "/credit-score", active: false },
-  ];
-
-  const toggleSidebar = () => setIsOpen(!isOpen);
 
   useEffect(() => {
     setIsMounted(true);
@@ -62,10 +61,12 @@ const Sidebar: React.FC = () => {
       {/* Logo Section */}
       <div className="p-6">
         <div className="flex items-center gap-2">
-          <img 
+          <Image 
             src="https://i.postimg.cc/PrkvMc05/Artboard12.png" 
             alt="Pesabu" 
-            className="w-8 h-8 rounded-full"
+            width={32}
+            height={32}
+            className="rounded-full"
           />
           <span className="text-lg font-semibold text-gray-900">Pesabu</span>
         </div>

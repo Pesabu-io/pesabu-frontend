@@ -75,7 +75,7 @@ const Lifestyle = () => {
           });
           clearTimeout(timeout);
           return response;
-        } catch (err: any) {
+        } catch (_err) {
           if (i < retries - 1) {
             await new Promise((resolve) =>
               setTimeout(resolve, 1000 * (i + 1))
@@ -92,7 +92,7 @@ const Lifestyle = () => {
         'saving_summary_stats/',
         'shopping_summary_stats/',
       ];
-      const results: any[] = [];
+      const results: (unknown)[] = [];
 
       for (const endpoint of endpoints) {
         console.log(`⏳ Fetching lifestyle endpoint: ${endpoint}`);
@@ -112,10 +112,10 @@ const Lifestyle = () => {
               console.log(`✅ Lifestyle endpoint ${endpoint} succeeded`);
               results.push(json);
             }
-          } catch (parseErr: any) {
+          } catch (parseErr) {
             console.error(
               `❌ Error parsing JSON from ${endpoint}:`,
-              parseErr?.message || parseErr
+              parseErr instanceof Error ? parseErr.message : parseErr
             );
             results.push(null);
           }
@@ -127,7 +127,8 @@ const Lifestyle = () => {
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
 
-      const [bettingData, savingsData, shoppingData] = results;
+      type ApiResult = { message?: string; data?: CategoryStats } & Partial<CategoryStats> | null;
+      const [bettingData, savingsData, shoppingData] = results as ApiResult[];
 
       setData({
         betting:

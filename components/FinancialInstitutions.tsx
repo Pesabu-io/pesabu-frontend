@@ -13,7 +13,6 @@ import {
   Loader2, 
   AlertCircle,
   BarChart3,
-  PieChart,
   Banknote,
   Calendar
 } from 'lucide-react';
@@ -25,18 +24,17 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer, 
-  PieChart as RechartsPieChart, 
-  Pie, 
-  Cell,
-  LineChart,
-  Line
+  ResponsiveContainer
 } from 'recharts';
+
+interface TransactionItem {
+  [key: string]: unknown;
+}
 
 interface FinancialInstitutionsData {
   clientBanks?: {
     banks: string[];
-    transactions: any[];
+    transactions: TransactionItem[];
     count: number;
   };
   bankReceivedSummary?: {
@@ -70,10 +68,10 @@ interface FinancialInstitutionsData {
     }>;
   };
   safaricomFinancialServices?: {
-    transactions: any[];
+    transactions: TransactionItem[];
   };
   mshwariTransactions?: {
-    mshwari_transactions: any[];
+    mshwari_transactions: TransactionItem[];
     count: number;
   };
   mshwariLoanSummary?: {
@@ -88,7 +86,7 @@ interface FinancialInstitutionsData {
     total_loan_paid_back_amount: number;
   };
   fulizaUsage?: {
-    fuliza_usage: any[];
+    fuliza_usage: TransactionItem[];
   };
   fulizaLoanSummary?: {
     total_loan_count: number;
@@ -154,12 +152,14 @@ const FinancialInstitutions = () => {
             
             clearTimeout(timeoutId);
             return response;
-          } catch (error: any) {
+          } catch (error) {
             // Handle specific error types
-            const isNetworkError = error?.name === 'TypeError' || 
-                                 error?.message?.includes('network') ||
-                                 error?.message?.includes('ERR_NETWORK') ||
-                                 error?.name === 'AbortError';
+            const isNetworkError = error instanceof Error && (
+              error.name === 'TypeError' || 
+              error.message?.includes('network') ||
+              error.message?.includes('ERR_NETWORK') ||
+              error.name === 'AbortError'
+            );
             
             if (isNetworkError && i < retries - 1) {
               console.warn(`⚠️ Network error for ${endpoint}, retrying... (attempt ${i + 1}/${retries})`);
@@ -169,7 +169,8 @@ const FinancialInstitutions = () => {
             }
             
             if (i === retries - 1) {
-              console.error(`❌ Failed to fetch ${endpoint} after ${retries} attempts:`, error?.message || error);
+              const errorMsg = error instanceof Error ? error.message : String(error);
+              console.error(`❌ Failed to fetch ${endpoint} after ${retries} attempts:`, errorMsg);
               return null;
             }
             
@@ -224,8 +225,8 @@ const FinancialInstitutions = () => {
             const data = await res.json();
             console.log(`✅ Financial Institutions endpoint ${endpoints[index]} succeeded`);
             return data;
-          } catch (error: any) {
-            console.error(`❌ Error parsing JSON from ${endpoints[index]}:`, error?.message || error);
+          } catch (error) {
+            console.error(`❌ Error parsing JSON from ${endpoints[index]}:`, error instanceof Error ? error.message : error);
             return null;
           }
         })
