@@ -1,6 +1,6 @@
 // API configuration and authentication service
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.140.178.232:8000';
 
 export interface LoginRequest {
   username: string;

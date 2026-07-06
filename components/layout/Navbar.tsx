@@ -71,7 +71,7 @@ const Navbar = () => {
             <li><a href="#services" className="nav-link text-xl" onClick={closeMenu}>Services</a></li>
             <li><a href="#testimonials" className="nav-link text-xl" onClick={closeMenu}>Testimonials</a></li>
             <li><a href="#contact" className="nav-link text-xl" onClick={closeMenu}>Contact</a></li>
-            <li><a href="/pinsights" className="nav-link text-xl" onClick={closeMenu}>Mpesa Analyser</a></li>
+            <li><a href="/pinsights" className="nav-link text-xl" onClick={closeMenu}>Statement Analyser</a></li>
           </ul>
         </div>
       </nav>
