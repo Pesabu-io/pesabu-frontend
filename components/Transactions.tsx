@@ -51,14 +51,26 @@ interface TransactionData {
   lowestWithdrawal?: { lowest_withdrawn_amount: number };
   minAmountTransacted?: { lowest_amount_transacted: number };
   maxAmountTransacted?: { highest_amount_transacted: number };
-  topPaybillTransactions?: { data_final: any };
-  topTillTransactions?: { data: any };
-  topSendMoneyTransactions?: { data: any };
-  topTransactionsCustomer?: { data: any };
-  topWithdrawals?: { data_final: any };
-  topTransactionsReceived?: { data_final: any };
-  topTransactionHour?: { data_final: any };
-  topTransactionDay?: { data_final: any };
+  topPaybillTransactions?: { data_final: TransactionItem[] };
+  topTillTransactions?: { data: TransactionItem[] };
+  topSendMoneyTransactions?: { data: TransactionItem[] };
+  topTransactionsCustomer?: { data: TransactionItem[] };
+  topWithdrawals?: { data_final: TransactionItem[] };
+  topTransactionsReceived?: { data_final: TransactionItem[] };
+  topTransactionHour?: { data_final: TransactionItem[] };
+  topTransactionDay?: { data_final: TransactionItem[] };
+}
+
+interface TransactionItem {
+  names?: string;
+  numbers?: string;
+  receipt_count?: number;
+  max_amount?: number;
+  'Receipt No.'?: number;
+  amount?: number;
+  phone?: string;
+  time_day?: string;
+  day_name?: string;
 }
 
 const Transactions = () => {
@@ -229,13 +241,13 @@ const Transactions = () => {
     amount: item.Total_Amount
   })) || [];
 
-  const hourlyData = data.topTransactionHour?.data_final?.map((item: any) => ({
+  const hourlyData = data.topTransactionHour?.data_final?.map((item: TransactionItem) => ({
     hour: item.time_day,
     count: item['Receipt No.'],
     amount: item.amount
   })) || [];
 
-  const dailyData = data.topTransactionDay?.data_final?.map((item: any) => ({
+  const dailyData = data.topTransactionDay?.data_final?.map((item: TransactionItem) => ({
     day: item.day_name,
     count: item['Receipt No.'],
     amount: item.amount
@@ -520,7 +532,7 @@ const Transactions = () => {
               {data.topPaybillTransactions?.data_final ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {data.topPaybillTransactions.data_final.map((item: any, index: number) => (
+                    {data.topPaybillTransactions.data_final.map((item: TransactionItem, index: number) => (
                       <div key={index} className="p-4 border rounded-lg">
                         <p className="font-semibold">{item.names || 'Unknown'}</p>
                         <p className="text-sm text-muted-foreground">{item.numbers}</p>
@@ -554,7 +566,7 @@ const Transactions = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.topTillTransactions.data.map((item: any, index: number) => (
+                        {data.topTillTransactions.data.map((item: TransactionItem, index: number) => (
                           <tr key={index} className="border-b">
                             <td className="p-2">{item.names || 'Unknown'}</td>
                             <td className="p-2">{item.numbers}</td>
@@ -588,7 +600,7 @@ const Transactions = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.topSendMoneyTransactions.data.map((item: any, index: number) => (
+                        {data.topSendMoneyTransactions.data.map((item: TransactionItem, index: number) => (
                           <tr key={index} className="border-b">
                             <td className="p-2">{item.names || 'Unknown'}</td>
                             <td className="p-2">{item.numbers}</td>
@@ -622,7 +634,7 @@ const Transactions = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.topTransactionsCustomer.data.map((item: any, index: number) => (
+                        {data.topTransactionsCustomer.data.map((item: TransactionItem, index: number) => (
                           <tr key={index} className="border-b">
                             <td className="p-2">{item.names || 'Unknown'}</td>
                             <td className="p-2">{item.numbers}</td>
@@ -656,7 +668,7 @@ const Transactions = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.topTransactionsReceived.data_final.map((item: any, index: number) => (
+                        {data.topTransactionsReceived.data_final.map((item: TransactionItem, index: number) => (
                           <tr key={index} className="border-b">
                             <td className="p-2">{item.names || 'Unknown'}</td>
                             <td className="p-2">{item.numbers}</td>
@@ -690,7 +702,7 @@ const Transactions = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.topWithdrawals.data_final.map((item: any, index: number) => (
+                        {data.topWithdrawals.data_final.map((item: TransactionItem, index: number) => (
                           <tr key={index} className="border-b">
                             <td className="p-2">{item.names || 'Unknown'}</td>
                             <td className="p-2">{item.numbers}</td>
