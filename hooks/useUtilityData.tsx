@@ -1,3 +1,4 @@
+'use client
 import { server } from '@/utils/util';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
